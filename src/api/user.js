@@ -3,23 +3,22 @@ const groupName = 'sysUser'
 
 export function login(data) {
   return request({
-    url: '/${groupName}/login',
+    url: `/${groupName}/login`,
     method: 'post',
     data
   })
 }
 
-export function getInfo(token) {
+export function getInfo() {
   return request({
-    url: '/${groupName}/info',
-    method: 'get',
-    params: { token }
+    url: `/${groupName}/getUserInfo`,
+    method: 'get'
   })
 }
 
 export function logout() {
   return request({
-    url: '/${groupName}/logout',
-    method: 'post'
+    url: `/${groupName}/logout`,
+    method: 'get'
   })
 }
