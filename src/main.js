@@ -19,6 +19,8 @@ import './utils/error-log' // error log
 
 import * as filters from './filters' // global filters
 
+import { resetForm } from '@/utils/shopUtils'
+
 /**
  * If you don't want to use mock-server
  * you want to use MockJs for mock api
@@ -31,6 +33,9 @@ import * as filters from './filters' // global filters
 //   const { mockXHR } = require('../mock')
 //   mockXHR()
 // }
+
+// 全局方法挂载
+Vue.prototype.resetForm = resetForm
 
 Vue.use(Element, {
   size: Cookies.get('size') || 'medium' // set element-ui default size

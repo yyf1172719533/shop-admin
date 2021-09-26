@@ -91,14 +91,20 @@ export const constantRoutes = [
  */
 export const asyncRoutes = [
   {
-    path: '/documentation',
+    path: '/sys',
     component: Layout,
+    redirect: '/sys/user',
+    name: 'system',
+    meta: {
+      title: '系统管理',
+      icon: 'documentation'
+    },
     children: [
       {
-        path: 'index',
-        component: () => import('@/views/documentation/index'),
-        name: 'Documentation',
-        meta: { title: 'Documentation', icon: 'documentation', affix: true }
+        path: 'user',
+        component: () => import('@/views/system/userList'),
+        name: 'user',
+        meta: { title: '后台用户', icon: 'documentation' }
       }
     ]
   },
