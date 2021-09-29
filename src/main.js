@@ -19,7 +19,7 @@ import './utils/error-log' // error log
 
 import * as filters from './filters' // global filters
 
-import { resetForm } from '@/utils/shopUtils'
+import { resetForm, addDateRange } from '@/utils/shopUtils'
 
 /**
  * If you don't want to use mock-server
@@ -36,6 +36,7 @@ import { resetForm } from '@/utils/shopUtils'
 
 // 全局方法挂载
 Vue.prototype.resetForm = resetForm
+Vue.prototype.addDateRange = addDateRange
 
 
 // 全局消息框挂载

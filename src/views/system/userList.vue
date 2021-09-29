@@ -14,6 +14,17 @@
           <el-option label="禁用" value="0" />
         </el-select>
       </el-form-item>
+      <el-form-item label="登录时间">
+        <el-date-picker
+          v-model="dateRange"
+          size="small"
+          value-format="yyyy-MM-dd"
+          type="daterange"
+          range-separator="-"
+          start-placeholder="开始日期"
+          end-placeholder="结束日期"
+        />
+      </el-form-item>
       <el-form-item>
         <el-button type="primary" @click="handleQuery">查询</el-button>
         <el-button @click="resetQuery">重置</el-button>
@@ -125,7 +136,7 @@
                 show-password
                 placeholder="请输入密码"
                 clearable
-                :disabled="form.id === undefined ? false: true"
+                :disabled="form.id === undefined ? false : true"
               />
             </el-form-item>
           </el-col>
@@ -183,8 +194,15 @@
 </template>
 
 <script>
-import { findUserList, updateStatus, addUser, updateUser, getById, deleteById } from "@/api/system/user"
-import md5 from 'js-md5'
+import {
+  findUserList,
+  updateStatus,
+  addUser,
+  updateUser,
+  getById,
+  deleteById,
+} from "@/api/system/user";
+import md5 from "js-md5";
 
 export default {
   data() {
@@ -197,7 +215,7 @@ export default {
         pageSize: 10,
         userName: undefined,
         nickName: undefined,
-        status: undefined,
+        status: undefined
       },
       // 表格数据
       userTableList: [],
@@ -209,24 +227,26 @@ export default {
       open: false,
       // 表单对象
       form: {},
+      // 日期范围
+      dateRange: [],
       // 表单校验
       rules: {
         userName: [
-          { required: true, message: '账号不能为空', trigger: 'blur' }
+          { required: true, message: "账号不能为空", trigger: "blur" },
         ],
         password: [
-          { required: true, message: '密码不能为空', trigger: 'blur' },
-          { min: 6, message: '密码不能少于6位', trigger: 'change' }
+          { required: true, message: "密码不能为空", trigger: "blur" },
+          { min: 6, message: "密码不能少于6位", trigger: "change" },
         ],
         nickName: [
-          { required: true, message: '昵称不能为空', trigger: 'blur' }
+          { required: true, message: "昵称不能为空", trigger: "blur" },
         ],
         email: [
-          { required: true, message: '邮箱不能为空', trigger: 'blur' },
-          { type: 'email', message: '请输入正确的邮箱', trigger: 'blur' }
-        ]
-      }
-    }
+          { required: true, message: "邮箱不能为空", trigger: "blur" },
+          { type: "email", message: "请输入正确的邮箱", trigger: "blur" },
+        ],
+      },
+    };
   },
   created() {
     // 加载用户列表
@@ -235,7 +255,7 @@ export default {
   methods: {
     getUserList() {
       this.loading = true;
-      findUserList(this.queryParams).then((res) => {
+      findUserList(this.addDateRange(this.queryParams, this.dateRange)).then((res) => {
         this.userTableList = res.data;
         this.total = Number(res.total);
         this.loading = false;
@@ -246,18 +266,19 @@ export default {
     },
     resetQuery() {
       this.resetForm("queryForm");
+      this.dateRange = []
       this.getUserList();
     },
     handleAdd() {
       this.title = "添加用户";
       this.open = true;
-      this.reset()
+      this.reset();
     },
     changeStatus(e, row) {
-      if (e === '0') {
-        row.status = '1'
+      if (e === "0") {
+        row.status = "1";
       } else {
-        row.status = '0'
+        row.status = "0";
       }
       const id = row.id;
       const status = e;
@@ -271,12 +292,12 @@ export default {
           updateStatus(id, status)
             .then((res) => {
               this.msgSuccess("禁用成功");
-              this.getUserList()
+              this.getUserList();
             })
             .catch(() => {
               this.msgError("禁用失败");
             });
-        })
+        });
       } else {
         // 启用
         this.$confirm("此操作将启用该用户, 是否继续?", "提示", {
@@ -287,37 +308,37 @@ export default {
           updateStatus(id, status)
             .then((res) => {
               this.msgSuccess("启用成功");
-              this.getUserList()
+              this.getUserList();
             })
             .catch(() => {
               this.msgError("启用失败");
             });
-        })
+        });
       }
     },
     handleUpdate(row) {
-      this.title = '修改用户'
-      this.open = true
-      this.reset()
-      getById(row.id).then(res => {
-        this.form = res.data
-      })
+      this.title = "修改用户";
+      this.open = true;
+      this.reset();
+      getById(row.id).then((res) => {
+        this.form = res.data;
+      });
     },
     handleDelete(row) {
       this.$confirm("是否删除该用户?", "提示", {
-          confirmButtonText: "确定",
-          cancelButtonText: "取消",
-          type: "warning",
-        }).then(() => {
-          deleteById(row.id)
-            .then((res) => {
-              this.msgSuccess("删除成功");
-              this.getUserList()
-            })
-            .catch(() => {
-              this.msgError("删除失败");
-            });
-        });
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "warning",
+      }).then(() => {
+        deleteById(row.id)
+          .then((res) => {
+            this.msgSuccess("删除成功");
+            this.getUserList();
+          })
+          .catch(() => {
+            this.msgError("删除失败");
+          });
+      });
     },
     handleSizeChange(val) {
       this.queryParams.pageSize = val;
@@ -328,37 +349,41 @@ export default {
       this.getUserList();
     },
     handleSubmit() {
-      this.$refs['form'].validate((valid) => {
+      this.$refs["form"].validate((valid) => {
         if (valid) {
-          this.loading = true
+          this.loading = true;
           if (this.form.id === undefined) {
             // 添加
-            this.form.password = md5(this.form.password)
-            addUser(this.form).then(res => {
-              this.msgSuccess('添加成功')
-              this.getUserList()
-              this.open = false
-              this.loading = false
-            }).catch(() => {
-              this.msgError('添加失败')
-            })
+            this.form.password = md5(this.form.password);
+            addUser(this.form)
+              .then((res) => {
+                this.msgSuccess("添加成功");
+                this.getUserList();
+                this.open = false;
+                this.loading = false;
+              })
+              .catch(() => {
+                this.msgError("添加失败");
+              });
           } else {
             // 修改
-            updateUser(this.form).then(res => {
-              this.msgSuccess('修改成功')
-              this.getUserList()
-              this.open = false
-              this.loading = false
-            }).catch(() => {
-              this.msgError('修改失败')
-            })
+            updateUser(this.form)
+              .then((res) => {
+                this.msgSuccess("修改成功");
+                this.getUserList();
+                this.open = false;
+                this.loading = false;
+              })
+              .catch(() => {
+                this.msgError("修改失败");
+              });
           }
         }
-      })
+      });
     },
     cancel() {
-      this.open = false
-      this.title = ''
+      this.open = false;
+      this.title = "";
     },
     reset() {
       this.form = {
@@ -368,10 +393,10 @@ export default {
         nickName: undefined,
         email: undefined,
         role: undefined,
-        remark: undefined
-      }
-      this.resetForm('form')
-    }
+        remark: undefined,
+      };
+      this.resetForm("form");
+    },
   },
 };
 </script>
