@@ -26,3 +26,37 @@ export function updateRole(data) {
     data
   })
 }
+
+// 根据ID查询角色
+export function queryRoleById(id) {
+  return request({
+    url: '/sysRole/queryRoleById/' + id,
+    method: 'get'
+  })
+}
+
+// 根据ID删除角色
+export function deleteById(id) {
+  return request({
+    url: '/sysRole/deleteRoleById/' + id,
+    method: 'delete'
+  })
+}
+
+// 根据角色ID查询当前角色授权的用户
+export function queryAuthUserByRoleId(query) {
+  return request({
+    url: '/sysRole/queryAuthUserByRoleId',
+    method: 'get',
+    params: query
+  })
+}
+
+// 取消用户角色
+export function unBindUserRole(data) {
+  return request({
+    url: '/sysRole/cancelAuthUserByRoleId',
+    method: 'post',
+    data
+  })
+}

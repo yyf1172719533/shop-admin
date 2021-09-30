@@ -215,7 +215,7 @@ export default {
         pageSize: 10,
         userName: undefined,
         nickName: undefined,
-        status: undefined
+        status: undefined,
       },
       // 表格数据
       userTableList: [],
@@ -255,19 +255,22 @@ export default {
   methods: {
     getUserList() {
       this.loading = true;
-      findUserList(this.addDateRange(this.queryParams, this.dateRange)).then((res) => {
-        this.userTableList = res.data;
-        this.total = Number(res.total);
-        this.loading = false;
-      });
+      findUserList(this.addDateRange(this.queryParams, this.dateRange)).then(
+        (res) => {
+          this.userTableList = res.data;
+          this.total = Number(res.total);
+          this.loading = false;
+        }
+      );
     },
     handleQuery() {
+      this.queryParams.pageNum = 1;
       this.getUserList();
     },
     resetQuery() {
       this.resetForm("queryForm");
-      this.dateRange = []
-      this.getUserList();
+      this.dateRange = [];
+      this.handleQuery();
     },
     handleAdd() {
       this.title = "添加用户";

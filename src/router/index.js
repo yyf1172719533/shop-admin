@@ -97,20 +97,34 @@ export const asyncRoutes = [
     name: 'system',
     meta: {
       title: '系统管理',
-      icon: 'documentation'
+      icon: 'el-icon-s-tools'
     },
     children: [
       {
         path: 'user',
-        component: () => import('@/views/system/userList'),
+        component: () => import('@/views/system/user/userList'),
         name: 'user',
-        meta: { title: '后台用户', icon: 'documentation' }
+        meta: { title: '后台用户', icon: 'el-icon-user-solid' }
       },
       {
         path: 'role',
-        component: () => import('@/views/system/roleList'),
+        component: () => import('@/views/system/role/roleList'),
         name: 'role',
         meta: { title: '角色管理', icon: 'documentation' }
+      }
+    ]
+  },
+  {
+    path: '/system/role-auth',
+    component: Layout,
+    hidden: true,
+    children: [
+      {
+        path: 'user/:roleId(\\d+)',
+        // component: (resolve) => require(['@/views/system/role/authUser']),
+        component: () => import('@/views/system/role/authUser'),
+        name: 'AuthUser',
+        meta: { title: '分配用户', activeMenu: '/system/role' }
       }
     ]
   },
