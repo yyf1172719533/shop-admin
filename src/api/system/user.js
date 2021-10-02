@@ -12,7 +12,7 @@ export function findUserList(query) {
 // 更改用户状态
 export function updateStatus(id, status) {
   return request({
-    url: '/sysUser/updateStatus/' + id + "/" + status,
+    url: '/sysUser/updateStatus/' + id + '/' + status,
     method: 'get'
   })
 }
@@ -48,5 +48,14 @@ export function deleteById(id) {
   return request({
     url: '/sysUser/deleteSysUser/' + id,
     method: 'delete'
+  })
+}
+
+// 根据角色ID查询未授权该角色的用户列表
+export function queryAuthUserList(query) {
+  return request({
+    url: '/sysUser/queryNoAuthUserList',
+    method: 'get',
+    params: query
   })
 }

@@ -1,7 +1,7 @@
 <template>
   <div class="app-container">
     <!-- 查询条件开始 -->
-    <el-form :model="queryParams" ref="queryForm" :inline="true">
+    <el-form ref="queryForm" :model="queryParams" :inline="true">
       <el-form-item label="用户名" prop="userName">
         <el-input
           v-model="queryParams.userName"
@@ -32,8 +32,7 @@
           icon="el-icon-plus"
           size="mini"
           @click="handleAdd"
-          >添加用户</el-button
-        >
+        >添加用户</el-button>
       </el-col>
       <el-col :span="1.5">
         <el-button
@@ -43,8 +42,7 @@
           size="mini"
           :disabled="mutiple"
           @click="cancelAuthUserAll"
-          >批量取消授权</el-button
-        >
+        >批量取消授权</el-button>
       </el-col>
       <el-col :span="1.5">
         <el-button
@@ -53,8 +51,7 @@
           icon="el-icon-close"
           size="mini"
           @click="handleClose"
-          >关闭</el-button
-        >
+        >关闭</el-button>
       </el-col>
     </el-row>
     <!-- 表格工具栏结束 -->
@@ -100,8 +97,7 @@
             type="text"
             icon="el-icon-circle-close"
             @click="cancelAuthUser(scope.row)"
-            >取消授权</el-button
-          >
+          >取消授权</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -119,6 +115,10 @@
       @current-change="handleCurrentChange"
     />
     <!-- 分页组件结束 -->
+
+    <!-- 添加用户页面组件开始 -->
+    <select-user ref="select" :role-id="queryParams.roleId" @ok="handleQuery" />
+    <!-- 添加用户页面组件结束 -->
   </div>
 </template>
 
@@ -126,10 +126,12 @@
 import {
   queryAuthUserByRoleId,
   queryRoleById,
-  unBindUserRole,
-} from "@/api/system/role";
+  unBindUserRole
+} from '@/api/system/role'
+import selectUser from './selectUser.vue'
 
 export default {
+  components: { selectUser },
   data() {
     return {
       // 遮罩层
@@ -144,118 +146,124 @@ export default {
         pageSize: 10,
         roleId: undefined,
         userName: undefined,
-        nickName: undefined,
+        nickName: undefined
       },
       // 表格数据
       authUserList: [],
       // 数据总条数
-      total: 0,
-    };
+      total: 0
+    }
   },
   created() {
-    const roleId = this.$route.params && this.$route.params.roleId;
+    const roleId = this.$route.params && this.$route.params.roleId
     if (roleId) {
-      this.queryParams.roleId = roleId;
-      this.getAuthUserList();
+      this.queryParams.roleId = roleId
+      this.getAuthUserList()
     }
   },
   methods: {
     // 查询已经授权的用户
     getAuthUserList() {
-      this.loading = true;
+      this.loading = true
       queryAuthUserByRoleId(this.queryParams).then((res) => {
-        this.authUserList = res.data;
-        this.total = Number(res.total);
-        this.loading = false;
-      });
+        this.authUserList = res.data
+        this.total = Number(res.total)
+        this.loading = false
+      })
     },
     handleQuery() {
-      this.queryParams.pageNum = 1;
-      this.getAuthUserList();
+      this.queryParams.pageNum = 1
+      this.getAuthUserList()
     },
     resetQuery() {
-      this.resetForm("queryForm");
-      this.handleQuery();
+      this.resetForm('queryForm')
+      this.handleQuery()
     },
-    handleAdd() {},
+    handleAdd() {
+      this.$refs.select.show()
+    },
     cancelAuthUserAll(row) {
-      const roleId = this.queryParams.roleId;
-      let roleName = "";
+      const roleId = this.queryParams.roleId
+      let roleName = ''
       const params = {
         roleId: roleId,
-        userIds: this.userIds,
-      };
+        userIds: this.userIds
+      }
       queryRoleById(roleId)
         .then((res) => {
-          roleName = res.data.roleName;
-          this.$confirm('确认要取消选中用户的"' + roleName + '"角色吗?', "提示", {
-            confirmButtonText: "确定",
-            cancelButtonText: "取消",
-            type: "warning",
-          }).then(() => {
+          roleName = res.data.roleName
+          this.$confirm(
+            '确认要取消选中用户的"' + roleName + '"角色吗?',
+            '提示',
+            {
+              confirmButtonText: '确定',
+              cancelButtonText: '取消',
+              type: 'warning'
+            }
+          ).then(() => {
             unBindUserRole(params)
               .then((res) => {
-                this.msgSuccess("取消成功");
-                this.getAuthUserList();
+                this.msgSuccess('取消成功')
+                this.getAuthUserList()
               })
               .catch(() => {
-                this.msgError("取消失败");
-              });
-          });
+                this.msgError('取消失败')
+              })
+          })
         })
         .catch(() => {
-          this.msgError("查询角色失败");
-          return;
-        });
+          this.msgError('查询角色失败')
+          return
+        })
     },
     handleClose() {
-      this.$store.dispatch("tagsView/delView", this.$route);
-      this.$router.push({ path: "/sys/role" });
+      this.$store.dispatch('tagsView/delView', this.$route)
+      this.$router.push({ path: '/sys/role' })
     },
     handleSizeChange(val) {
-      this.queryParams.pageSize = val;
-      this.getAuthUserList();
+      this.queryParams.pageSize = val
+      this.getAuthUserList()
     },
     handleCurrentChange(val) {
-      this.queryParams.pageNum = val;
-      this.getAuthUserList();
+      this.queryParams.pageNum = val
+      this.getAuthUserList()
     },
     handleSelectionChange(selection) {
-      this.userIds = selection.map((e) => e.id);
-      this.mutiple = !selection.length;
+      this.userIds = selection.map((e) => e.id)
+      this.mutiple = !selection.length
     },
     cancelAuthUser(row) {
-      const roleId = this.queryParams.roleId;
-      let roleName = "";
+      const roleId = this.queryParams.roleId
+      let roleName = ''
       const params = {
         roleId: roleId,
-        userIds: [row.id],
-      };
+        userIds: [row.id]
+      }
       queryRoleById(roleId)
         .then((res) => {
-          roleName = res.data.roleName;
-          this.$confirm('确认要取消该用户的"' + roleName + '"角色吗?', "提示", {
-            confirmButtonText: "确定",
-            cancelButtonText: "取消",
-            type: "warning",
+          roleName = res.data.roleName
+          this.$confirm('确认要取消该用户的"' + roleName + '"角色吗?', '提示', {
+            confirmButtonText: '确定',
+            cancelButtonText: '取消',
+            type: 'warning'
           }).then(() => {
             unBindUserRole(params)
               .then((res) => {
-                this.msgSuccess("取消成功");
-                this.getAuthUserList();
+                this.msgSuccess('取消成功')
+                this.getAuthUserList()
               })
               .catch(() => {
-                this.msgError("取消失败");
-              });
-          });
+                this.msgError('取消失败')
+              })
+          })
         })
         .catch(() => {
-          this.msgError("查询角色失败");
-          return;
-        });
-    },
-  },
-};
+          this.msgError('查询角色失败')
+          return
+        })
+    }
+  }
+}
 </script>
 
 <style>

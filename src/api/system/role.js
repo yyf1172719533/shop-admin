@@ -60,3 +60,12 @@ export function unBindUserRole(data) {
     data
   })
 }
+
+// 授权用户角色
+export function bindUserRole(data) {
+  return request({
+    url: '/sysRole/bindAuthUserByRoleId',
+    method: 'post',
+    data
+  })
+}
