@@ -59,3 +59,28 @@ export function queryAuthUserList(query) {
     params: query
   })
 }
+
+// 重置密码
+export function resetPwd(id) {
+  return request({
+    url: '/sysUser/resetPwd/' + id,
+    method: 'get'
+  })
+}
+
+// 根据用户ID查询用户信息和角色信息
+export function queryUserAndRole(id, pageNum, pageSize) {
+  return request({
+    url: '/sysUser/queryAuthRoleByUserId/' + id + '/' + pageNum + '/' + pageSize,
+    method: 'get'
+  })
+}
+
+// 授权用户角色
+export function bindUserRole(data) {
+  return request({
+    url: '/sysUser/bindAuthRoleByUserId',
+    method: 'post',
+    data
+  })
+}
