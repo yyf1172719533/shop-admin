@@ -52,11 +52,11 @@
       <el-table-column label="邮箱" prop="email" align="center" />
       <el-table-column label="头像" prop="avatar" align="center">
         <template slot-scope="scope">
-          <el-avatar
+          <el-image
             style="width: 50px; heigth: 50px"
             :src="scope.row.avatar"
             fit="fill"
-            :preview-src-list="[scope.row.header]"
+            :preview-src-list="[scope.row.avatar]"
           />
         </template>
       </el-table-column>
