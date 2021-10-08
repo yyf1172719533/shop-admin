@@ -40,7 +40,8 @@
           icon="el-icon-plus"
           size="mini"
           @click="handleAdd"
-        >新增</el-button>
+          >新增</el-button
+        >
       </el-col>
     </el-row>
     <!-- 表头按钮结束 -->
@@ -82,13 +83,15 @@
             icon="el-icon-edit"
             size="mini"
             @click="handleUpdate(scope.row)"
-          >修改</el-button>
+            >修改</el-button
+          >
           <el-button
             type="text"
             icon="el-icon-delete"
             size="mini"
             @click="handleDelete(scope.row)"
-          >删除</el-button>
+            >删除</el-button
+          >
           <el-dropdown
             szie="mini"
             @command="(command) => handleCommand(command, scope.row)"
@@ -97,14 +100,14 @@
               <i class="el-icon-d-arrow-right el-icon--right" />更多
             </span>
             <el-dropdown-menu slot="dropdown">
-              <el-dropdown-item
-                command="handleResetPwd"
-                icon="el-icon-key"
-              >重置密码</el-dropdown-item>
+              <el-dropdown-item command="handleResetPwd" icon="el-icon-key"
+                >重置密码</el-dropdown-item
+              >
               <el-dropdown-item
                 command="handleAuthRole"
                 icon="el-icon-circle-check"
-              >分配角色</el-dropdown-item>
+                >分配角色</el-dropdown-item
+              >
             </el-dropdown-menu>
           </el-dropdown>
         </template>
@@ -176,12 +179,15 @@
             </el-form-item>
           </el-col>
           <el-col :span="8">
-            <el-form-item label="角色" prop="role">
-              <el-input
-                v-model="form.role"
-                placeholder="请输入角色"
-                clearable
-              />
+            <el-form-item label="角色" prop="roleIds">
+              <el-select v-model="form.roleIds" multiple placeholder="请选择角色">
+                <el-option
+                  v-for="item in roleOptions"
+                  :key="item.id"
+                  :label="item.roleName"
+                  :value="item.id"
+                />
+              </el-select>
             </el-form-item>
           </el-col>
         </el-row>
@@ -216,9 +222,10 @@ import {
   updateUser,
   getById,
   deleteById,
-  resetPwd
-} from '@/api/system/user'
-import md5 from 'js-md5'
+  resetPwd,
+  queryRoleByUserId
+} from "@/api/system/user";
+import md5 from "js-md5";
 
 export default {
   data() {
@@ -231,16 +238,18 @@ export default {
         pageSize: 10,
         userName: undefined,
         nickName: undefined,
-        status: undefined
+        status: undefined,
       },
       // 表格数据
       userTableList: [],
       // 总条数
       total: 0,
       // 对话框标题
-      title: '',
+      title: "",
       // 是否打开对话框
       open: false,
+      // 角色选项
+      roleOptions: [],
       // 表单对象
       form: {},
       // 日期范围
@@ -248,161 +257,170 @@ export default {
       // 表单校验
       rules: {
         userName: [
-          { required: true, message: '账号不能为空', trigger: 'blur' }
+          { required: true, message: "账号不能为空", trigger: "blur" },
         ],
         password: [
-          { required: true, message: '密码不能为空', trigger: 'blur' },
-          { min: 6, message: '密码不能少于6位', trigger: 'change' }
+          { required: true, message: "密码不能为空", trigger: "blur" },
+          { min: 6, message: "密码不能少于6位", trigger: "change" },
         ],
         nickName: [
-          { required: true, message: '昵称不能为空', trigger: 'blur' }
+          { required: true, message: "昵称不能为空", trigger: "blur" },
         ],
         email: [
-          { required: true, message: '邮箱不能为空', trigger: 'blur' },
-          { type: 'email', message: '请输入正确的邮箱', trigger: 'blur' }
-        ]
-      }
-    }
+          { required: true, message: "邮箱不能为空", trigger: "blur" },
+          { type: "email", message: "请输入正确的邮箱", trigger: "blur" },
+        ],
+      },
+    };
   },
   created() {
     // 加载用户列表
-    this.getUserList()
+    this.getUserList();
   },
   methods: {
     getUserList() {
-      this.loading = true
+      this.loading = true;
       findUserList(this.addDateRange(this.queryParams, this.dateRange)).then(
         (res) => {
-          this.userTableList = res.data
-          this.total = Number(res.total)
-          this.loading = false
+          this.userTableList = res.data;
+          this.total = Number(res.total);
+          this.loading = false;
         }
-      )
+      );
     },
     handleQuery() {
-      this.queryParams.pageNum = 1
-      this.getUserList()
+      this.queryParams.pageNum = 1;
+      this.getUserList();
     },
     resetQuery() {
-      this.resetForm('queryForm')
-      this.dateRange = []
-      this.handleQuery()
+      this.resetForm("queryForm");
+      this.dateRange = [];
+      this.handleQuery();
+    },
+    getRoleByUserId(params) {
+      queryRoleByUserId(params).then(res => {
+        this.roleOptions = res.data
+      })
     },
     handleAdd() {
-      this.title = '添加用户'
-      this.open = true
-      this.reset()
+      let params = { userId: null }
+      this.getRoleByUserId(params)
+      this.title = "添加用户";
+      this.open = true;
+      this.reset();
     },
     changeStatus(e, row) {
-      if (e === '0') {
-        row.status = '1'
+      if (e === "0") {
+        row.status = "1";
       } else {
-        row.status = '0'
+        row.status = "0";
       }
-      const id = row.id
-      const status = e
-      if (row.status === '1') {
+      const id = row.id;
+      const status = e;
+      if (row.status === "1") {
         // 禁用
-        this.$confirm('此操作将禁用该用户, 是否继续?', '提示', {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-          type: 'warning'
+        this.$confirm("此操作将禁用该用户, 是否继续?", "提示", {
+          confirmButtonText: "确定",
+          cancelButtonText: "取消",
+          type: "warning",
         }).then(() => {
           updateStatus(id, status)
             .then((res) => {
-              this.msgSuccess('禁用成功')
-              this.getUserList()
+              this.msgSuccess("禁用成功");
+              this.getUserList();
             })
             .catch(() => {
-              this.msgError('禁用失败')
-            })
-        })
+              this.msgError("禁用失败");
+            });
+        });
       } else {
         // 启用
-        this.$confirm('此操作将启用该用户, 是否继续?', '提示', {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-          type: 'warning'
+        this.$confirm("此操作将启用该用户, 是否继续?", "提示", {
+          confirmButtonText: "确定",
+          cancelButtonText: "取消",
+          type: "warning",
         }).then(() => {
           updateStatus(id, status)
             .then((res) => {
-              this.msgSuccess('启用成功')
-              this.getUserList()
+              this.msgSuccess("启用成功");
+              this.getUserList();
             })
             .catch(() => {
-              this.msgError('启用失败')
-            })
-        })
+              this.msgError("启用失败");
+            });
+        });
       }
     },
     handleUpdate(row) {
-      this.title = '修改用户'
-      this.open = true
-      this.reset()
+      let params = { userId: row.id }
+      this.getRoleByUserId(params)
+      this.title = "修改用户";
+      this.open = true;
+      this.reset();
       getById(row.id).then((res) => {
-        this.form = res.data
-      })
+        this.form = res.data;
+      });
     },
     handleDelete(row) {
-      this.$confirm('是否删除该用户?', '提示', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning'
+      this.$confirm("是否删除该用户?", "提示", {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "warning",
       }).then(() => {
         deleteById(row.id)
           .then((res) => {
-            this.msgSuccess('删除成功')
-            this.getUserList()
+            this.msgSuccess("删除成功");
+            this.getUserList();
           })
           .catch(() => {
-            this.msgError('删除失败')
-          })
-      })
+            this.msgError("删除失败");
+          });
+      });
     },
     handleSizeChange(val) {
-      this.queryParams.pageSize = val
-      this.getUserList()
+      this.queryParams.pageSize = val;
+      this.getUserList();
     },
     handleCurrentChange(val) {
-      this.queryParams.pageNum = val
-      this.getUserList()
+      this.queryParams.pageNum = val;
+      this.getUserList();
     },
     handleSubmit() {
-      this.$refs['form'].validate((valid) => {
+      this.$refs["form"].validate((valid) => {
         if (valid) {
-          this.loading = true
+          this.loading = true;
           if (this.form.id === undefined) {
             // 添加
-            this.form.password = md5(this.form.password)
+            this.form.password = md5(this.form.password);
             addUser(this.form)
               .then((res) => {
-                this.msgSuccess('添加成功')
-                this.getUserList()
-                this.open = false
-                this.loading = false
+                this.msgSuccess("添加成功");
+                this.getUserList();
+                this.open = false;
+                this.loading = false;
               })
               .catch(() => {
-                this.msgError('添加失败')
-              })
+                this.msgError("添加失败");
+              });
           } else {
             // 修改
             updateUser(this.form)
               .then((res) => {
-                this.msgSuccess('修改成功')
-                this.getUserList()
-                this.open = false
-                this.loading = false
+                this.msgSuccess("修改成功");
+                this.getUserList();
+                this.open = false;
+                this.loading = false;
               })
               .catch(() => {
-                this.msgError('修改失败')
-              })
+                this.msgError("修改失败");
+              });
           }
         }
-      })
+      });
     },
     cancel() {
-      this.open = false
-      this.title = ''
+      this.open = false;
+      this.title = "";
     },
     reset() {
       this.form = {
@@ -412,44 +430,44 @@ export default {
         nickName: undefined,
         email: undefined,
         role: undefined,
-        remark: undefined
-      }
-      this.resetForm('form')
+        remark: undefined,
+      };
+      this.resetForm("form");
     },
     handleCommand(command, row) {
       switch (command) {
-        case 'handleResetPwd':
-          this.handleResetPwd(row)
-          break
-        case 'handleAuthRole':
-          this.handleAuthRole(row)
-          break
+        case "handleResetPwd":
+          this.handleResetPwd(row);
+          break;
+        case "handleAuthRole":
+          this.handleAuthRole(row);
+          break;
         default:
-          break
+          break;
       }
     },
     handleResetPwd(row) {
-      this.$confirm('此操作将重置该用户的密码, 是否继续?', '提示', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning'
+      this.$confirm("此操作将重置该用户的密码, 是否继续?", "提示", {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "warning",
       }).then(() => {
         resetPwd(row.id)
           .then((res) => {
-            this.msgSuccess('重置密码成功')
-            this.getUserList()
+            this.msgSuccess("重置密码成功");
+            this.getUserList();
           })
           .catch(() => {
-            this.msgError('重置密码失败')
-          })
-      })
+            this.msgError("重置密码失败");
+          });
+      });
     },
     handleAuthRole(row) {
-      const userId = row.id
-      this.$router.push('/system/user-auth/role/' + userId)
-    }
-  }
-}
+      const userId = row.id;
+      this.$router.push("/system/user-auth/role/" + userId);
+    },
+  },
+};
 </script>
 
 <style>

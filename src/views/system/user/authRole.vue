@@ -33,6 +33,7 @@
     </el-table>
 
     <el-pagination
+      style="margin-top: 15px"
       v-show="total > 0"
       :current-page="pageNum"
       :page-sizes="[5, 10, 20, 30]"
