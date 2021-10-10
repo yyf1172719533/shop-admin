@@ -66,6 +66,7 @@
       <!-- 分页组件开始 -->
       <el-pagination
         v-show="total > 0"
+        style="margin-top: 15px"
         :current-page="queryParams.pageNum"
         :page-sizes="[5, 10, 20, 30]"
         :page-size="queryParams.pageSize"
@@ -142,7 +143,7 @@ export default {
       this.handleQuery()
     },
     handleSelectionChange(selection) {
-      this.userIds = selection.map(e => e.id)
+      this.userIds = selection.map((e) => e.id)
     },
     handleSizeChange(val) {
       this.queryParams.pageSize = val
@@ -164,22 +165,20 @@ export default {
         roleId: this.roleId,
         userIds: this.userIds
       }
-      this.$confirm(
-        '确认要给选中的用户授权该角色吗?',
-        '提示',
-        {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-          type: 'warning'
-        }
-      ).then(() => {
-        bindUserRole(params).then(res => {
-          this.msgSuccess('授权成功')
-          this.open = false
-          this.$emit('ok')
-        }).catch(() => {
-          this.msgError('授权失败')
-        })
+      this.$confirm('确认要给选中的用户授权该角色吗?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        bindUserRole(params)
+          .then((res) => {
+            this.msgSuccess('授权成功')
+            this.open = false
+            this.$emit('ok')
+          })
+          .catch(() => {
+            this.msgError('授权失败')
+          })
       })
     },
     cancel() {

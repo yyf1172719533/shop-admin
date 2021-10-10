@@ -1,5 +1,4 @@
 import request from '@/utils/request'
-import data from '@/views/pdf/content'
 
 // 查询系统用户列表
 export function findUserList(query) {
@@ -83,14 +82,5 @@ export function bindUserRole(data) {
     url: '/sysUser/bindAuthRoleByUserId',
     method: 'post',
     data
-  })
-}
-
-// 根据用户ID查询角色
-export function queryRoleByUserId(data) {
-  return request({
-    url: '/sysUser/queryUserRoleByUserId',
-    method: 'get',
-    params: data
   })
 }

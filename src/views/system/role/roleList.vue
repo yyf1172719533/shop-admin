@@ -3,7 +3,7 @@
     <!-- 查询条件开始 -->
     <el-form ref="queryForm" :inline="true" :model="queryParams">
       <el-form-item label="角色名称" prop="roleName">
-        <el-input v-model="queryParams.roleName" placeholder="请输入角色名称" />
+        <el-input v-model="queryParams.roleName" placeholder="请输入角色名称" clearable />
       </el-form-item>
       <el-form-item label="创建时间">
         <el-date-picker
@@ -11,6 +11,7 @@
           size="small"
           value-format="yyyy-MM-dd"
           type="daterange"
+          clearable
           range-separator="-"
           start-placeholder="开始日期"
           end-placeholder="结束日期"
@@ -31,8 +32,7 @@
           icon="el-icon-plus"
           size="mini"
           @click="handleAdd"
-          >新增</el-button
-        >
+        >新增</el-button>
       </el-col>
     </el-row>
     <!-- 表头按钮结束 -->
@@ -52,31 +52,29 @@
             icon="el-icon-edit"
             size="mini"
             @click="handleUpdate(scope.row)"
-            >修改</el-button
-          >
+          >修改</el-button>
           <el-button
             type="text"
             icon="el-icon-delete"
             size="mini"
             @click="handleDelete(scope.row)"
-            >删除</el-button
-          >
+          >删除</el-button>
           <el-dropdown
             size="mini"
             @command="(command) => handleCommand(command, scope.row)"
           >
             <span class="el-dropdown-link">
-              <i class="el-icon-d-arrow-right el-icon--right"></i>更多
+              <i class="el-icon-d-arrow-right el-icon--right" />更多
             </span>
             <el-dropdown-menu slot="dropdown">
               <el-dropdown-item
                 command="handleDataScope"
                 icon="el-icon-circle-check"
-                >菜单权限</el-dropdown-item
-              >
-              <el-dropdown-item command="handleAuthUser" icon="el-icon-user"
-                >分配用户</el-dropdown-item
-              >
+              >菜单权限</el-dropdown-item>
+              <el-dropdown-item
+                command="handleAuthUser"
+                icon="el-icon-user"
+              >分配用户</el-dropdown-item>
             </el-dropdown-menu>
           </el-dropdown>
         </template>
@@ -87,6 +85,7 @@
     <!-- 分页组件开始 -->
     <el-pagination
       v-show="total > 0"
+      style="margin-top: 15px"
       :current-page="queryParams.pageNum"
       :page-sizes="[5, 10, 20, 30]"
       :page-size="queryParams.pageSize"
@@ -139,8 +138,8 @@ import {
   addRole,
   updateRole,
   queryRoleById,
-  deleteById,
-} from "@/api/system/role";
+  deleteById
+} from '@/api/system/role'
 
 export default {
   data() {
@@ -151,7 +150,7 @@ export default {
       queryParams: {
         pageNum: 1,
         pageSize: 10,
-        roleName: undefined,
+        roleName: undefined
       },
       // 日期范围
       dateRange: [],
@@ -160,149 +159,149 @@ export default {
       // 数据总数
       total: 0,
       // 弹出层标题
-      title: "",
+      title: '',
       // 是否打开弹出层
       open: false,
       // 表单对象
       form: {
         roleName: undefined,
-        roleSort: 0,
+        roleSort: 0
       },
       // 表单校验
       rules: {
         roleName: [
-          { required: true, message: "角色名称不能为空", trigger: "blur" },
-        ],
-      },
-    };
+          { required: true, message: '角色名称不能为空', trigger: 'blur' }
+        ]
+      }
+    }
   },
   created() {
-    this.queryRoleData();
+    this.queryRoleData()
   },
   methods: {
     // 查询表格数据
     queryRoleData() {
-      this.loading = true;
+      this.loading = true
       listForPage(this.addDateRange(this.queryParams, this.dateRange)).then(
         (res) => {
-          this.roleTableList = res.data;
-          this.total = Number(res.total);
-          this.loading = false;
+          this.roleTableList = res.data
+          this.total = Number(res.total)
+          this.loading = false
         }
-      );
+      )
     },
     handleQuery() {
       this.queryParams.pageNum = 1
-      this.queryRoleData();
+      this.queryRoleData()
     },
     resetQuery() {
-      this.resetForm("queryForm");
-      this.dateRange = [];
+      this.resetForm('queryForm')
+      this.dateRange = []
       this.handleQuery()
     },
     handleSizeChange(val) {
-      this.queryParams.pageSize = val;
-      this.queryRoleData();
+      this.queryParams.pageSize = val
+      this.queryRoleData()
     },
     handleCurrentChange(val) {
-      this.queryParams.pageNum = val;
-      this.queryRoleData();
+      this.queryParams.pageNum = val
+      this.queryRoleData()
     },
     handleAdd() {
-      this.title = "添加角色";
-      this.open = true;
-      this.reset();
+      this.title = '添加角色'
+      this.open = true
+      this.reset()
     },
     handleUpdate(row) {
-      this.title = "修改角色";
-      this.open = true;
-      this.reset();
+      this.title = '修改角色'
+      this.open = true
+      this.reset()
       queryRoleById(row.id).then((res) => {
-        this.form = res.data;
-      });
+        this.form = res.data
+      })
     },
     handleDelete(row) {
-      this.$confirm("是否删除此角色?", "提示", {
-        confirmButtonText: "确定",
-        cancelButtonText: "取消",
-        type: "warning",
+      this.$confirm('是否删除此角色?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
       }).then(() => {
         deleteById(row.id)
           .then((res) => {
-            this.msgSuccess("删除成功");
-            this.queryRoleData();
+            this.msgSuccess('删除成功')
+            this.queryRoleData()
           })
           .catch(() => {
-            this.msgError("删除失败");
-          });
-      });
+            this.msgError('删除失败')
+          })
+      })
     },
     handleSubmit() {
-      this.$refs["form"].validate((valid) => {
+      this.$refs['form'].validate((valid) => {
         if (valid) {
-          this.loading = true;
+          this.loading = true
           if (this.form.id === undefined) {
             // 添加
             addRole(this.form)
               .then((res) => {
-                this.open = false;
-                this.loading = false;
-                this.msgSuccess("添加成功");
-                this.queryRoleData();
+                this.open = false
+                this.loading = false
+                this.msgSuccess('添加成功')
+                this.queryRoleData()
               })
               .catch(() => {
-                this.msgError("添加失败");
-              });
+                this.msgError('添加失败')
+              })
           } else {
             // 修改
             updateRole(this.form)
               .then((res) => {
-                this.open = false;
-                this.loading = false;
-                this.msgSuccess("修改成功");
-                this.queryRoleData();
+                this.open = false
+                this.loading = false
+                this.msgSuccess('修改成功')
+                this.queryRoleData()
               })
               .catch(() => {
-                this.msgError("修改失败");
-              });
+                this.msgError('修改失败')
+              })
           }
         }
-      });
+      })
     },
     // 更多操作触发
     handleCommand(command, row) {
       switch (command) {
-        case "handleDataScope":
-          this.handleDataScope(row);
-          break;
-        case "handleAuthUser":
-          this.handleAuthUser(row);
-          break;
+        case 'handleDataScope':
+          this.handleDataScope(row)
+          break
+        case 'handleAuthUser':
+          this.handleAuthUser(row)
+          break
         default:
-          break;
+          break
       }
     },
     // 分配菜单权限
     handleDataScope(row) {},
     // 分配用户
     handleAuthUser(row) {
-      const roleId = row.id;
-      this.$router.push("/system/role-auth/user/" + roleId);
+      const roleId = row.id
+      this.$router.push('/system/role-auth/user/' + roleId)
     },
     cancel() {
-      this.title = "";
-      this.open = false;
+      this.title = ''
+      this.open = false
     },
     reset() {
       this.form = {
         id: undefined,
         roleName: undefined,
-        roleSort: 0,
-      };
-      this.resetForm("form");
-    },
-  },
-};
+        roleSort: 0
+      }
+      this.resetForm('form')
+    }
+  }
+}
 </script>
 
 <style>

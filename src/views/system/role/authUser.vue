@@ -106,6 +106,7 @@
     <!-- 分页组件开始 -->
     <el-pagination
       v-show="total > 0"
+      style="margin-top: 15px"
       :current-page="queryParams.pageNum"
       :page-sizes="[5, 10, 20, 30]"
       :page-size="queryParams.pageSize"

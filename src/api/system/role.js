@@ -69,3 +69,11 @@ export function bindUserRole(data) {
     data
   })
 }
+
+// 查询所有的角色信息
+export function queryAllSysRole() {
+  return request({
+    url: '/sysRole/selectAllSysRole',
+    method: 'get'
+  })
+}
