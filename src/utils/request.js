@@ -44,7 +44,7 @@ service.interceptors.response.use(
       }
       ).then(() => {
         store.dispatch('user/logout').then(() => {
-          this.$router.push(`/login?redirect=${this.$route.fullPath}`)
+          location.href = '/index'
         })
       }).catch(() => {})
       return Promise.reject('无效的会话，或者会话已过期，请重新登录。')
