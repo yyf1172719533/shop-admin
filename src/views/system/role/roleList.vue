@@ -36,8 +36,7 @@
           icon="el-icon-plus"
           size="mini"
           @click="handleAdd"
-          >新增</el-button
-        >
+        >新增</el-button>
       </el-col>
     </el-row>
     <!-- 表头按钮结束 -->
@@ -57,15 +56,13 @@
             icon="el-icon-edit"
             size="mini"
             @click="handleUpdate(scope.row)"
-            >修改</el-button
-          >
+          >修改</el-button>
           <el-button
             type="text"
             icon="el-icon-delete"
             size="mini"
             @click="handleDelete(scope.row)"
-            >删除</el-button
-          >
+          >删除</el-button>
           <el-dropdown
             size="mini"
             @command="(command) => handleCommand(command, scope.row)"
@@ -77,11 +74,11 @@
               <el-dropdown-item
                 command="handleDataScope"
                 icon="el-icon-circle-check"
-                >菜单权限</el-dropdown-item
-              >
-              <el-dropdown-item command="handleAuthUser" icon="el-icon-user"
-                >分配用户</el-dropdown-item
-              >
+              >菜单权限</el-dropdown-item>
+              <el-dropdown-item
+                command="handleAuthUser"
+                icon="el-icon-user"
+              >分配用户</el-dropdown-item>
             </el-dropdown-menu>
           </el-dropdown>
         </template>
@@ -145,8 +142,15 @@
       center
       append-to-body
     >
-      <el-tree :data="menuData" show-checkbox node-key="id" :props="defaultProps">
-      </el-tree>
+      <el-tree
+        ref="menuTree"
+        :data="menuData"
+        show-checkbox
+        empty-text="加载中，请稍后..."
+        node-key="id"
+        highlight-current
+        :props="defaultProps"
+      />
       <span slot="footer" class="dialog-footer">
         <el-button type="primary" @click="handleBindRoleMenu">确 定</el-button>
         <el-button @click="cancelBindRoleMenu">取 消</el-button>
@@ -163,7 +167,10 @@ import {
   updateRole,
   queryRoleById,
   deleteById,
-} from "@/api/system/role";
+  queryMenuIdByRoleId,
+  saveRoleMenu
+} from '@/api/system/role'
+import { list } from '@/api/system/menu'
 
 export default {
   data() {
@@ -174,7 +181,7 @@ export default {
       queryParams: {
         pageNum: 1,
         pageSize: 10,
-        roleName: undefined,
+        roleName: undefined
       },
       // 日期范围
       dateRange: [],
@@ -183,7 +190,7 @@ export default {
       // 数据总数
       total: 0,
       // 弹出层标题
-      title: "",
+      title: '',
       // 是否打开弹出层
       open: false,
       // 是否打开分配菜单权限弹出层
@@ -191,190 +198,188 @@ export default {
       // 表单对象
       form: {
         roleName: undefined,
-        roleSort: 0,
+        roleSort: 0
       },
       // 表单校验
       rules: {
         roleName: [
-          { required: true, message: "角色名称不能为空", trigger: "blur" },
-        ],
+          { required: true, message: '角色名称不能为空', trigger: 'blur' }
+        ]
       },
       // 菜单树形结构数据
-      menuData: [{
-          id: 1,
-          label: '一级 1',
-          children: [{
-            id: 4,
-            label: '二级 1-1',
-            children: [{
-              id: 9,
-              label: '三级 1-1-1'
-            }, {
-              id: 10,
-              label: '三级 1-1-2'
-            }]
-          }]
-        }, {
-          id: 2,
-          label: '一级 2',
-          children: [{
-            id: 5,
-            label: '二级 2-1'
-          }, {
-            id: 6,
-            label: '二级 2-2'
-          }]
-        }, {
-          id: 3,
-          label: '一级 3',
-          children: [{
-            id: 7,
-            label: '二级 3-1'
-          }, {
-            id: 8,
-            label: '二级 3-2'
-          }]
-        }],
-        defaultProps: {
-          children: 'children',
-          label: 'label'
-        }
-    };
+      menuData: [],
+      defaultProps: {
+        id: 'id',
+        label: 'menuName',
+        children: 'children'
+      },
+      // 当前选中的角色ID
+      currentRoleId: undefined
+    }
   },
   created() {
-    this.queryRoleData();
+    this.queryRoleData()
   },
   methods: {
     // 查询表格数据
     queryRoleData() {
-      this.loading = true;
+      this.loading = true
       listForPage(this.addDateRange(this.queryParams, this.dateRange)).then(
         (res) => {
-          this.roleTableList = res.data;
-          this.total = Number(res.total);
-          this.loading = false;
+          this.roleTableList = res.data
+          this.total = Number(res.total)
+          this.loading = false
         }
-      );
+      )
     },
     handleQuery() {
-      this.queryParams.pageNum = 1;
-      this.queryRoleData();
+      this.queryParams.pageNum = 1
+      this.queryRoleData()
     },
     resetQuery() {
-      this.resetForm("queryForm");
-      this.dateRange = [];
-      this.handleQuery();
+      this.resetForm('queryForm')
+      this.dateRange = []
+      this.handleQuery()
     },
     handleSizeChange(val) {
-      this.queryParams.pageSize = val;
-      this.queryRoleData();
+      this.queryParams.pageSize = val
+      this.queryRoleData()
     },
     handleCurrentChange(val) {
-      this.queryParams.pageNum = val;
-      this.queryRoleData();
+      this.queryParams.pageNum = val
+      this.queryRoleData()
     },
     handleAdd() {
-      this.title = "添加角色";
-      this.open = true;
-      this.reset();
+      this.title = '添加角色'
+      this.open = true
+      this.reset()
     },
     handleUpdate(row) {
-      this.title = "修改角色";
-      this.open = true;
-      this.reset();
+      this.title = '修改角色'
+      this.open = true
+      this.reset()
       queryRoleById(row.id).then((res) => {
-        this.form = res.data;
-      });
+        this.form = res.data
+      })
     },
     handleDelete(row) {
-      this.$confirm("是否删除此角色?", "提示", {
-        confirmButtonText: "确定",
-        cancelButtonText: "取消",
-        type: "warning",
+      this.$confirm('是否删除此角色?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
       }).then(() => {
         deleteById(row.id)
           .then((res) => {
-            this.msgSuccess("删除成功");
-            this.queryRoleData();
+            this.msgSuccess('删除成功')
+            this.queryRoleData()
           })
           .catch(() => {
-            this.msgError("删除失败");
-          });
-      });
+            this.msgError('删除失败')
+          })
+      })
     },
     handleSubmit() {
-      this.$refs["form"].validate((valid) => {
+      this.$refs['form'].validate((valid) => {
         if (valid) {
-          this.loading = true;
+          this.loading = true
           if (this.form.id === undefined) {
             // 添加
             addRole(this.form)
               .then((res) => {
-                this.open = false;
-                this.loading = false;
-                this.msgSuccess("添加成功");
-                this.queryRoleData();
+                this.open = false
+                this.loading = false
+                this.msgSuccess('添加成功')
+                this.queryRoleData()
               })
               .catch(() => {
-                this.msgError("添加失败");
-              });
+                this.msgError('添加失败')
+              })
           } else {
             // 修改
             updateRole(this.form)
               .then((res) => {
-                this.open = false;
-                this.loading = false;
-                this.msgSuccess("修改成功");
-                this.queryRoleData();
+                this.open = false
+                this.loading = false
+                this.msgSuccess('修改成功')
+                this.queryRoleData()
               })
               .catch(() => {
-                this.msgError("修改失败");
-              });
+                this.msgError('修改失败')
+              })
           }
         }
-      });
+      })
     },
     // 更多操作触发
     handleCommand(command, row) {
       switch (command) {
-        case "handleDataScope":
-          this.handleDataScope(row);
-          break;
-        case "handleAuthUser":
-          this.handleAuthUser(row);
-          break;
+        case 'handleDataScope':
+          this.handleDataScope(row)
+          break
+        case 'handleAuthUser':
+          this.handleAuthUser(row)
+          break
         default:
-          break;
+          break
       }
     },
     // 分配菜单权限
     handleDataScope(row) {
-      this.openMenuPermisson = true;
-      console.log(row);
+      this.openMenuPermisson = true
+      this.currentRoleId = row.id
+      // 加载树形结构菜单
+      list().then((res) => {
+        this.menuData = this.handleTree(res.data, 'id')
+      })
+      // 查询已赋权的菜单权限
+      queryMenuIdByRoleId(row.id).then((res) => {
+        this.$refs.menuTree.setCheckedKeys(res.data)
+      })
     },
     // 分配用户
     handleAuthUser(row) {
-      const roleId = row.id;
-      this.$router.push("/system/role-auth/user/" + roleId);
+      const roleId = row.id
+      this.$router.push('/system/role-auth/user/' + roleId)
     },
     cancel() {
-      this.title = "";
-      this.open = false;
+      this.title = ''
+      this.open = false
     },
     reset() {
       this.form = {
         id: undefined,
         roleName: undefined,
-        roleSort: 0,
-      };
-      this.resetForm("form");
+        roleSort: 0
+      }
+      this.resetForm('form')
     },
-    handleBindRoleMenu() {},
+    handleBindRoleMenu() {
+      // 获取选中的菜单节点
+      const checkedKeys = this.$refs.menuTree.getCheckedKeys()
+      // 获取半选的节点
+      const halfCheckedKeys = this.$refs.menuTree.getHalfCheckedKeys()
+      // 组合
+      const finalCheckedKeys = halfCheckedKeys.concat(checkedKeys)
+      const params = {
+        roleId: this.currentRoleId,
+        menuIds: finalCheckedKeys
+      }
+      saveRoleMenu(params)
+        .then((res) => {
+          this.msgSuccess('分配菜单权限成功')
+          this.openMenuPermisson = false
+        })
+        .catch(() => {
+          this.msgError('分配菜单权限成功')
+          this.openMenuPermisson = false
+        })
+    },
     cancelBindRoleMenu() {
-      this.openMenuPermisson = false;
-    },
-  },
-};
+      this.openMenuPermisson = false
+      this.$refs.menuTree.setCheckedKeys([])
+    }
+  }
+}
 </script>
 
 <style>

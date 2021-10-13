@@ -1,5 +1,5 @@
 import axios from 'axios'
-import { Message } from 'element-ui'
+import { Message, MessageBox } from 'element-ui'
 import store from '@/store'
 import { getToken } from '@/utils/auth'
 
@@ -32,20 +32,23 @@ service.interceptors.request.use(
 
 // response interceptor
 service.interceptors.response.use(
-  /**
-   * If you want to get http information such as headers or status
-   * Please return  response => response
-  */
 
-  /**
-   * Determine the request status by custom code
-   * Here is just an example
-   * You can also judge the status by HTTP Status Code
-   */
   response => {
     const res = response.data
 
-    // if the custom code is not 20000, it is judged as an error.
+    if (res.code === 40003) {
+      MessageBox.confirm('登录状态已过期，您可以继续留在该页面，或者重新登录', '系统提示', {
+        confirmButtonText: '重新登录',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }
+      ).then(() => {
+        store.dispatch('user/logout').then(() => {
+          this.$router.push(`/login?redirect=${this.$route.fullPath}`)
+        })
+      }).catch(() => {})
+      return Promise.reject('无效的会话，或者会话已过期，请重新登录。')
+    }
     if (res.code !== 20000) {
       Message({
         message: res.msg || 'Error',

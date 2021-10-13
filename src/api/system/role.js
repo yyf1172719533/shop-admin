@@ -77,3 +77,20 @@ export function queryAllSysRole() {
     method: 'get'
   })
 }
+
+// 根据角色ID查询已授权的菜单权限
+export function queryMenuIdByRoleId(roleId) {
+  return request({
+    url: '/sysRole/queryMenuIdByRoleId/' + roleId,
+    method: 'get'
+  })
+}
+
+// 保存角色和菜单之间的关系
+export function saveRoleMenu(data) {
+  return request({
+    url: '/sysRole/bindRoleMenuByRoleId',
+    method: 'post',
+    data
+  })
+}
