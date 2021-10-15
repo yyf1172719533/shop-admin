@@ -44,22 +44,24 @@ service.interceptors.response.use(
       }
       ).then(() => {
         store.dispatch('user/logout').then(() => {
-          location.href = '/index'
+          this.$router.push(`/login?redirect=${this.$route.fullPath}`)
         })
       }).catch(() => {})
       return Promise.reject('无效的会话，或者会话已过期，请重新登录。')
-    }
-    if (res.code !== 20000) {
-      Message({
-        message: res.msg || 'Error',
-        type: 'error',
-        duration: 5 * 1000
-      })
-
-      return Promise.reject(new Error(res.msg || 'Error'))
     } else {
       return res
     }
+    // if (res.code !== 20000) {
+    //   Message({
+    //     message: res.msg || 'Error',
+    //     type: 'error',
+    //     duration: 5 * 1000
+    //   })
+
+    //   return Promise.reject(new Error(res.msg || 'Error'))
+    // } else {
+    //   return res
+    // } 
   },
   error => {
     console.log('err' + error) // for debug

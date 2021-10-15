@@ -370,7 +370,7 @@ export default {
           this.openMenuPermisson = false
         })
         .catch(() => {
-          this.msgError('分配菜单权限成功')
+          this.msgError('分配菜单权限失败')
           this.openMenuPermisson = false
         })
     },
