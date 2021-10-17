@@ -1,4 +1,6 @@
-import { asyncRoutes, constantRoutes } from '@/router'
+import { constantRoutes } from '@/router'
+import { getRouters } from '@/api/system/menu'
+import Layout from '@/layout'
 
 /**
  * Use meta.role to determine if the current user has permission
@@ -23,13 +25,24 @@ export function filterAsyncRoutes(routes) {
 
   routes.forEach(route => {
     const tmp = { ...route }
-    if (tmp.children) {
+    if (tmp.component) {
+      if (tmp.component === 'Layout') {
+        tmp.component = Layout
+      } else {
+        tmp.component = loadView(route.component)
+      }
+    }
+    if (tmp.children != null && tmp.children) {
       tmp.children = filterAsyncRoutes(tmp.children)
     }
     res.push(tmp)
   })
 
   return res
+}
+
+export const loadView = (view) => {
+  return (resolve) => require([`@/views/${view}`], resolve)
 }
 
 const state = {
@@ -47,9 +60,11 @@ const mutations = {
 const actions = {
   generateRoutes({ commit }) {
     return new Promise(resolve => {
-      const accessedRoutes = filterAsyncRoutes(asyncRoutes)
-      commit('SET_ROUTES', accessedRoutes)
-      resolve(accessedRoutes)
+      getRouters().then(res => {
+        const accessedRoutes = filterAsyncRoutes(res.data)
+        commit('SET_ROUTES', accessedRoutes)
+        resolve(accessedRoutes)
+      })
     })
   }
 }

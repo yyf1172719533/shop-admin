@@ -20,6 +20,7 @@ import './utils/error-log' // error log
 import * as filters from './filters' // global filters
 
 import { resetForm, addDateRange, handleTree } from '@/utils/shopUtils'
+import permission from '@/directive/permission'
 
 /**
  * If you don't want to use mock-server
@@ -50,7 +51,7 @@ Vue.prototype.msgError = function(msg) {
 Vue.use(Element, {
   size: Cookies.get('size') || 'medium' // set element-ui default size
 })
-
+Vue.use(permission)
 // register global utility filters
 Object.keys(filters).forEach(key => {
   Vue.filter(key, filters[key])

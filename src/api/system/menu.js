@@ -42,3 +42,11 @@ export function deleteById(id) {
     method: 'delete'
   })
 }
+
+// 加载动态路由菜单
+export function getRouters() {
+  return request({
+    url: '/sysMenu/queryRouterMenu',
+    method: 'get'
+  })
+}

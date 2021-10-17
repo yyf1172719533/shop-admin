@@ -3,13 +3,25 @@
     <!-- 搜索条件开始 -->
     <el-form ref="queryForm" :inline="true" :model="queryParams">
       <el-form-item label="用户名" prop="userName">
-        <el-input v-model="queryParams.userName" placeholder="请输入用户名" clearable />
+        <el-input
+          v-model="queryParams.userName"
+          placeholder="请输入用户名"
+          clearable
+        />
       </el-form-item>
       <el-form-item label="用户昵称" prop="nickName">
-        <el-input v-model="queryParams.nickName" placeholder="请输入用户昵称" clearable />
+        <el-input
+          v-model="queryParams.nickName"
+          placeholder="请输入用户昵称"
+          clearable
+        />
       </el-form-item>
       <el-form-item label="状态" prop="status">
-        <el-select v-model="queryParams.status" placeholder="请选择用户状态" clearable>
+        <el-select
+          v-model="queryParams.status"
+          placeholder="请选择用户状态"
+          clearable
+        >
           <el-option label="启用" value="1" />
           <el-option label="禁用" value="0" />
         </el-select>
@@ -37,6 +49,7 @@
     <el-row :gutter="10" style="margin-bottom: 8px">
       <el-col :span="1.5">
         <el-button
+          v-permission="['sys:user:add']"
           type="primary"
           icon="el-icon-plus"
           size="mini"
