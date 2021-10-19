@@ -144,6 +144,12 @@ export const asyncRoutes = [
         component: () => import('@/views/system/menu/menuList'),
         name: 'menu',
         meta: { title: '菜单管理', icon: 'tree-table' }
+      },
+      {
+        path: 'log',
+        component: () => import('@/views/system/log/logList'),
+        name: 'log',
+        meta: { title: '日志管理', icon: 'el-icon-s-order' }
       }
     ]
   },
