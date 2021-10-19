@@ -49,8 +49,7 @@
           icon="el-icon-delete"
           size="mini"
           @click="handleDelete"
-          >批量删除</el-button
-        >
+        >批量删除</el-button>
       </el-col>
     </el-row>
     <!-- 表头工具栏结束 -->
@@ -106,15 +105,13 @@
             icon="el-icon-view"
             size="mini"
             @click="handleView(scope.row)"
-            >详情</el-button
-          >
+          >详情</el-button>
           <el-button
             type="text"
             icon="el-icon-delete"
             size="mini"
             @click="handleDelete(scope.row)"
-            >删除</el-button
-          >
+          >删除</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -133,13 +130,93 @@
       @current-change="handleCurrentChange"
     />
     <!-- 分页组件结束 -->
+
+    <!-- 日志详情开始 -->
+    <el-dialog title="日志详情" :visible.sync="open" center width="800px">
+      <el-form v-loading="loading" label-width="68px">
+        <el-row :gutter="20">
+          <el-col :span="12">
+            <el-form-item label="请求路径">{{ form.requestUrl }}</el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="控制层">{{
+              form.requestController
+            }}</el-form-item>
+          </el-col>
+        </el-row>
+        <el-row :gutter="20">
+          <el-col :span="8">
+            <el-form-item label="请求方式">{{
+              form.requestMethod
+            }}</el-form-item>
+          </el-col>
+          <el-col :span="8">
+            <el-form-item label="响应时间(毫秒)">{{
+              form.responseTime
+            }}</el-form-item>
+          </el-col>
+          <el-col :span="8">
+            <el-form-item label="请求IP">{{ form.requestIp }}</el-form-item>
+          </el-col>
+        </el-row>
+        <el-row :gutter="20">
+          <el-col :span="8">
+            <el-form-item label="请求时间">
+              {{ form.createTime }}
+            </el-form-item>
+          </el-col>
+          <el-col :span="8">
+            <el-form-item label="状态">
+              <el-tag :type="form.status === 1 ? 'success' : 'danger'">
+                {{ form.status === 1 ? "成功" : "失败" }}
+              </el-tag>
+            </el-form-item>
+          </el-col>
+          <el-col :span="8">
+            <el-form-item label="操作人">
+              {{ form.createBy }}
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <el-row :gutter="20">
+          <el-col :span="24">
+            <el-form-item label="浏览器">
+              {{ form.ua }}
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <el-row :gutter="20">
+          <el-col v-if="form.message" :span="24">
+            <el-form-item label="异常信息">
+              {{ form.message }}
+            </el-form-item>
+          </el-col>
+          <el-col v-else>
+            <el-form-item label="异常信息"> 无 </el-form-item>
+          </el-col>
+        </el-row>
+        <el-row :gutter="20" class="json-container">
+          <el-col :span="24">
+            <el-form-item label="请求参数"><json-editor v-model="form.requestParams" /></el-form-item>
+          </el-col>
+        </el-row>
+        <el-row :gutter="20" class="json-container">
+          <el-col :span="24">
+            <el-form-item label="响应结果"><json-editor v-model="form.result" /></el-form-item>
+          </el-col>
+        </el-row>
+      </el-form>
+    </el-dialog>
+    <!-- 日志详情结束 -->
   </div>
 </template>
 
 <script>
-import { listForPage, findById, deleteBatchByIds } from "@/api/system/log";
+import { listForPage, findById, deleteBatchByIds } from '@/api/system/log'
+import JsonEditor from '@/components/JsonEditor'
 
 export default {
+  components: { JsonEditor },
   data() {
     return {
       // 遮罩层
@@ -151,7 +228,7 @@ export default {
         requestMethod: undefined,
         status: undefined,
         startTime: undefined,
-        endTime: undefined,
+        endTime: undefined
       },
       // 日期范围
       dateRange: [],
@@ -159,54 +236,102 @@ export default {
       logData: [],
       // 数据总数
       total: 0,
-    };
+      // 选中日志ID
+      idList: [],
+      // 是否打开日志详情弹出层
+      open: false,
+      // 日志对象
+      form: {}
+    }
   },
   created() {
-    this.getSysLogList();
+    this.getSysLogList()
   },
   methods: {
     // 查询日志信息
     getSysLogList() {
-      this.loading = true;
+      this.loading = true
       listForPage(this.addDateRange(this.queryParams, this.dateRange)).then(
         (res) => {
-          this.logData = res.data;
-          this.total = Number(res.total);
-          this.loading = false;
+          this.logData = res.data
+          this.total = Number(res.total)
+          this.loading = false
         }
-      );
+      )
     },
     cellStyle(row) {
-        console.log(row);
-        if (row.column.label === '响应时间（毫秒）' && row.row.responseTime >= 200) {
-            return "color: red"
-        }
+      if (
+        row.column.label === '响应时间（毫秒）' &&
+        row.row.responseTime >= 200
+      ) {
+        return 'color: red'
+      }
     },
     handleQuery() {
-      this.queryParams.pageNum = 1;
-      this.getSysLogList();
+      this.queryParams.pageNum = 1
+      this.getSysLogList()
     },
     resetQuery() {
-      this.resetForm("queryForm");
-      this.dateRange = [];
-      this.handleQuery();
+      this.resetForm('queryForm')
+      this.dateRange = []
+      this.handleQuery()
     },
     handleSizeChange(val) {
-      this.queryParams.pageSize = val;
-      this.getSysLogList();
+      this.queryParams.pageSize = val
+      this.getSysLogList()
     },
     handleCurrentChange(val) {
-      this.queryParams.pageNum = val;
-      this.getSysLogList();
+      this.queryParams.pageNum = val
+      this.getSysLogList()
     },
     handleSelectionChange(selection) {
-        console.log(selection);
+      this.idList = selection.map((item) => item.id)
     },
-    handleView() {},
-    handleDelete() {},
-  },
-};
+    handleView(row) {
+      this.open = true
+      this.loading = true
+      findById(row.id).then((res) => {
+        this.form = res.data
+        if (res.data.requestParams) {
+          this.form.requestParams = JSON.parse(res.data.requestParams)
+        }
+        if (res.data.result) {
+          this.form.result = JSON.parse(res.data.result)
+        }
+        this.loading = false
+      })
+    },
+    handleDelete(row) {
+      const ids = row.id || this.idList
+      deleteBatchByIds(ids)
+        .then((res) => {
+          this.msgSuccess('删除成功')
+          this.getSysLogList()
+        })
+        .catch(() => {
+          this.msgError('删除失败')
+          this.getSysLogList()
+        })
+    }
+  }
+}
 </script>
 
 <style>
+.header-image {
+  margin: auto;
+  width: 100px;
+  height: 100px;
+}
+.image-container {
+  text-align: center;
+}
+.CodeMirror pre {
+  line-height: 16px !important;
+}
+.json-editor {
+  min-height: 200px;
+  max-height: 500px;
+  overflow-y: scroll;
+}
 </style>
