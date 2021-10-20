@@ -48,6 +48,7 @@
           type="danger"
           icon="el-icon-delete"
           size="mini"
+          :disabled="multiple"
           @click="handleDelete"
         >批量删除</el-button>
       </el-col>
@@ -197,12 +198,12 @@
         </el-row>
         <el-row :gutter="20" class="json-container">
           <el-col :span="24">
-            <el-form-item label="请求参数"><json-editor v-model="form.requestParams" /></el-form-item>
+            <el-form-item label="请求参数"><json-editor v-if="form.requestParams" v-model="form.requestParams" /></el-form-item>
           </el-col>
         </el-row>
         <el-row :gutter="20" class="json-container">
           <el-col :span="24">
-            <el-form-item label="响应结果"><json-editor v-model="form.result" /></el-form-item>
+            <el-form-item label="响应结果"><json-editor v-if="form.result" v-model="form.result" /></el-form-item>
           </el-col>
         </el-row>
       </el-form>
@@ -241,7 +242,9 @@ export default {
       // 是否打开日志详情弹出层
       open: false,
       // 日志对象
-      form: {}
+      form: {},
+      // 选中多条
+      multiple: true
     }
   },
   created() {
@@ -286,6 +289,7 @@ export default {
     },
     handleSelectionChange(selection) {
       this.idList = selection.map((item) => item.id)
+      this.multiple = !selection.length
     },
     handleView(row) {
       this.open = true
@@ -293,7 +297,7 @@ export default {
       findById(row.id).then((res) => {
         this.form = res.data
         if (res.data.requestParams) {
-          this.form.requestParams = JSON.parse(res.data.requestParams)
+          this.form.requestParams = JSON.parse(JSON.stringify(res.data.requestParams))
         }
         if (res.data.result) {
           this.form.result = JSON.parse(res.data.result)
@@ -306,11 +310,11 @@ export default {
       deleteBatchByIds(ids)
         .then((res) => {
           this.msgSuccess('删除成功')
-          this.getSysLogList()
+          this.handleQuery()
         })
         .catch(() => {
           this.msgError('删除失败')
-          this.getSysLogList()
+          this.handleQuery()
         })
     }
   }
