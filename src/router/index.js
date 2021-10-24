@@ -150,6 +150,12 @@ export const asyncRoutes = [
         component: () => import('@/views/system/log/logList'),
         name: 'log',
         meta: { title: '日志管理', icon: 'el-icon-s-order' }
+      },
+      {
+        path: 'banner',
+        component: () => import('@/views/system/banner/bannerList'),
+        name: 'banner',
+        meta: { title: '轮播图管理', icon: 'el-icon-picture' }
       }
     ]
   },

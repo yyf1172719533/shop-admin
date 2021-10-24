@@ -307,7 +307,12 @@ export default {
     },
     handleDelete(row) {
       const ids = row.id || this.idList
-      deleteBatchByIds(ids)
+      this.$confirm('是否确定删除选中的日志记录?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        deleteBatchByIds(ids)
         .then((res) => {
           this.msgSuccess('删除成功')
           this.handleQuery()
@@ -316,6 +321,7 @@ export default {
           this.msgError('删除失败')
           this.handleQuery()
         })
+      })
     }
   }
 }
