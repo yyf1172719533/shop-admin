@@ -1,5 +1,14 @@
 <template>
-  <div :id="id" />
+  <div>
+    <div :id="id" />
+    <input
+      ref="files"
+      style="display: none"
+      type="file"
+      accept="image/*"
+      @change="uploadFile"
+    >
+  </div>
 </template>
 
 <script>
@@ -10,6 +19,8 @@ import 'tui-editor/dist/tui-editor-contents.css' // editor content
 
 import Editor from 'tui-editor'
 import defaultOptions from './default-options'
+import axios from 'axios'
+import { mapGetters } from 'vuex'
 
 export default {
   name: 'MarkdownEditor',
@@ -22,7 +33,11 @@ export default {
       type: String,
       required: false,
       default() {
-        return 'markdown-editor-' + +new Date() + ((Math.random() * 1000).toFixed(0) + '')
+        return (
+          'markdown-editor-' +
+          +new Date() +
+          ((Math.random() * 1000).toFixed(0) + '')
+        )
       }
     },
     options: {
@@ -52,6 +67,9 @@ export default {
     }
   },
   computed: {
+    ...mapGetters([
+      'token'
+    ]),
     editorOptions() {
       const options = Object.assign({}, defaultOptions, this.options)
       options.initialEditType = this.mode
@@ -95,6 +113,34 @@ export default {
       this.editor.on('change', () => {
         this.$emit('input', this.editor.getValue())
       })
+
+      // 获取编辑器上的功能条
+      const toolbar = this.editor.getUI().getToolbar()
+      const fileDom = this.$refs.files
+      // 添加事件
+      this.editor.eventManager.addEventType('uploadEvent')
+      this.editor.eventManager.listen('uploadEvent', () => {
+        fileDom.click()
+        // Do some other thing...
+      })
+
+      toolbar.addButton(
+        {
+          name: 'customize',
+          className: 'tui-image',
+          event: 'uploadEvent',
+          tooltip: 'insert image',
+          // eslint-disable-next-line no-undef
+          el: '<button class="tui-image tui-toolbar-icons"></button>'
+        },
+        13
+      )
+      // 删除默认监听事件
+      this.editor.eventManager.removeEventHandler('addImageBlobHook')
+      // 添加自定义监听事件
+      this.editor.eventManager.listen('addImageBlobHook', (blob, callback) => {
+        this.upload(blob)
+      })
     },
     destroyEditor() {
       if (!this.editor) return
@@ -112,6 +158,52 @@ export default {
     },
     getHtml() {
       return this.editor.getHtml()
+    },
+    /*
+     * 自定义上传图片处理
+     * */
+    uploadFile(e) {
+      const target = e.target
+      const file = target.files[0]
+      this.upload(file)
+
+      target.value = '' // 这个地方清除一下不然会有问题
+    },
+    upload(file) {
+      const formData = new FormData()
+      formData.append('file', file)
+      formData.append('dir', 'header')
+      axios({
+        headers: {
+          'Authorization': localStorage.getItem('token')
+        },
+        method: 'post',
+        url: process.env.VUE_APP_UPLOAD_API,
+        data: formData
+      })
+        .then((res) => {
+          // 上传成功地址拼接
+          const imgUrl = res.data.data
+          this.addImgToMd(imgUrl)
+        })
+        .catch((error) => {
+          console.error(error.response)
+        })
+    },
+    // 添加图片到markdown
+    addImgToMd(data) {
+      const editor = this.editor.getCodeMirror()
+      const editorHtml = this.editor.getCurrentModeEditor()
+      const isMarkdownMode = this.editor.isMarkdownMode()
+      if (isMarkdownMode) {
+        editor.replaceSelection(`![img](${data})`)
+      } else {
+        const range = editorHtml.getRange()
+        const img = document.createElement('img')
+        img.src = `${data}`
+        img.alt = 'img'
+        range.insertNode(img)
+      }
     }
   }
 }
