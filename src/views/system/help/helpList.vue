@@ -9,16 +9,6 @@
           clearable
         />
       </el-form-item>
-      <el-form-item label="状态" prop="status">
-        <el-select
-          v-model="queryParams.status"
-          placeholder="请选择通告状态"
-          clearable
-        >
-          <el-option label="启用" value="1" />
-          <el-option label="禁用" value="0" />
-        </el-select>
-      </el-form-item>
       <el-form-item label="创建时间">
         <el-date-picker
           v-model="dateRange"
@@ -53,24 +43,13 @@
     <!-- 表头按钮结束 -->
 
     <!-- 表格数据开始 -->
-    <el-table v-loading="loading" border :data="noticeDataList">
+    <el-table v-loading="loading" border :data="helpDataList">
       <el-table-column label="编号" prop="id" align="center" />
       <el-table-column label="标题" prop="title" align="center" />
-      <el-table-column label="排序" prop="sorted" align="center" />
       <el-table-column label="创建人" prop="createBy" align="center" />
       <el-table-column label="创建时间" prop="createTime" align="center" />
-      <el-table-column label="状态" prop="status" align="center">
-        <template slot-scope="scope">
-          <el-switch
-            v-model="scope.row.status"
-            active-color="#13ce66"
-            inactive-color="#ff4949"
-            :active-value="1"
-            :inactive-value="0"
-            @change="changeStatus($event, scope.row)"
-          />
-        </template>
-      </el-table-column>
+      <el-table-column label="更新人" prop="updateBy" align="center" />
+      <el-table-column label="更新时间" prop="updateTime" align="center" />
       <el-table-column label="操作" align="center">
         <template slot-scope="scope">
           <el-button
@@ -135,25 +114,8 @@
           </el-col>
         </el-row>
         <el-row>
-          <el-col :span="24">
-            <el-form-item label="排序">
-              <el-input-number
-                v-model="form.sorted"
-                controls-position="right"
-                :min="0"
-                clearable
-              />
-            </el-form-item>
-          </el-col>
-        </el-row>
-        <el-row>
           <el-form-item label="内容">
-            <markdown-editor
-              ref="noticeContent"
-              v-model="form.content"
-              height="500px"
-              language="zh_CN"
-            />
+            <tinymce ref="content" v-model="form.content" :height="500" />
           </el-form-item>
         </el-row>
       </el-form>
@@ -167,17 +129,12 @@
     <!-- 通告详情弹出层开始 -->
     <el-dialog
       :title="title"
-      :visible.sync="noticeDetailOpen"
+      :visible.sync="helpDetailOpen"
       width="60%"
       center
       append-to-body
     >
-      <MarkdownEditor
-        v-model="noticeContent"
-        :aria-disabled="true"
-        :options="{ hideModeSwitch: true, viewer: true }"
-        height="500px"
-      />
+      <tinymce v-model="content" :height="500" />
     </el-dialog>
     <!-- 通告详情弹出层结束 -->
   </div>
@@ -190,12 +147,11 @@ import {
   update,
   findById,
   deleteById,
-  updateStatus,
-} from "@/api/system/notice";
-import MarkdownEditor from "@/components/MarkdownEditor";
+} from "@/api/system/help";
+import Tinymce from '@/components/Tinymce'
 
 export default {
-  components: { MarkdownEditor },
+  components: { Tinymce },
   data() {
     return {
       // 遮罩层
@@ -205,22 +161,21 @@ export default {
         pageNum: 1,
         pageSize: 10,
         title: undefined,
-        status: undefined,
         startTime: undefined,
         endTime: undefined,
       },
       // 日期范围
       dateRange: [],
       // 表格数据
-      noticeDataList: [],
+      helpDataList: [],
       // 数据总条数
       total: 0,
       // 对话框标题
       title: "",
       // 是否打开对话框
       open: false,
-      // 是否打开通告详情对话框
-      noticeDetailOpen: false,
+      // 是否打开帮助详情对话框
+      helpDetailOpen: false,
       // form表单
       form: {},
       // 表单校验
@@ -228,19 +183,20 @@ export default {
         title: [{ required: true, message: "标题不能为空", trigger: "blur" }],
       },
       // 通告内容
-      noticeContent: "",
+      content: "",
+      
     };
   },
   created() {
-    this.getNoticeData();
+    this.getHelpData();
   },
   methods: {
-    // 查询通告列表
-    getNoticeData() {
+    // 查询帮助列表
+    getHelpData() {
       this.loading = true;
       listForPage(this.addDateRange(this.queryParams, this.dateRange)).then(
         (res) => {
-          this.noticeDataList = res.data;
+          this.helpDataList = res.data;
           this.total = Number(res.total);
           this.loading = false;
         }
@@ -248,7 +204,7 @@ export default {
     },
     handleQuery() {
       this.queryParams.pageNum = 1;
-      this.getNoticeData();
+      this.getHelpData();
     },
     resetQuery() {
       this.resetForm("queryForm");
@@ -257,34 +213,37 @@ export default {
     },
     handleSizeChange(val) {
       this.queryParams.pageSize = val;
-      this.getNoticeData();
+      this.getHelpData();
     },
     handleCurrentChange(val) {
       this.queryParams.pageNum = val;
-      this.getNoticeData();
+      this.getHelpData();
     },
     handleAdd() {
       this.reset();
-      this.title = "添加通告";
+      this.title = "添加帮助";
       this.open = true;
+        console.log(this.form.content);
     },
     handleView(row) {
-      this.noticeDetailOpen = true;
+      this.helpDetailOpen = true;
       this.title = row.title;
-      this.noticeContent = row.content;
+      this.content = row.content;
     },
     handleUpdate(row) {
       this.reset();
-      this.title = "修改通告";
+      this.title = "修改帮助";
       this.open = true;
       this.loading = true;
       findById(row.id).then((res) => {
         this.form = res.data;
+        // this.$refs.content.setContent(this.form.content)
+        console.log(this.form.content);
         this.loading = false;
       });
     },
     handleDelete(row) {
-      this.$confirm("是否删除此通告?", "提示", {
+      this.$confirm("是否删除此帮助?", "提示", {
         confirmButtonText: "确定",
         cancelButtonText: "取消",
         type: "warning",
@@ -292,47 +251,12 @@ export default {
         deleteById(row.id)
           .then((res) => {
             this.msgSuccess(res.msg);
-            this.getNoticeData();
+            this.getHelpData();
           })
           .catch(() => {
             this.msgError("删除失败");
           });
       });
-    },
-    changeStatus(e, row) {
-      if (e === 0) {
-        row.status = 1;
-        this.$confirm("此操作将禁用此通告, 是否继续?", "提示", {
-          confirmButtonText: "确定",
-          cancelButtonText: "取消",
-          type: "warning",
-        }).then(() => {
-          updateStatus(row.id, e)
-            .then((res) => {
-              this.msgSuccess("禁用成功");
-              this.getNoticeData();
-            })
-            .catch(() => {
-              this.msgError("禁用失败");
-            });
-        });
-      } else {
-        row.status = 0;
-        this.$confirm("此操作将启用此通告, 是否继续?", "提示", {
-          confirmButtonText: "确定",
-          cancelButtonText: "取消",
-          type: "warning",
-        }).then(() => {
-          updateStatus(row.id, e)
-            .then((res) => {
-              this.msgSuccess("启用成功");
-              this.getNoticeData();
-            })
-            .catch(() => {
-              this.msgError("启用失败");
-            });
-        });
-      }
     },
     handleSubmit() {
       this.$refs["form"].validate((valid) => {
@@ -343,7 +267,7 @@ export default {
             save(this.form)
               .then((res) => {
                 this.msgSuccess(res.msg);
-                this.getNoticeData();
+                this.getHelpData();
                 this.open = false;
                 this.loading = false;
               })
@@ -355,7 +279,7 @@ export default {
             update(this.form)
               .then((res) => {
                 this.msgSuccess(res.msg);
-                this.getNoticeData();
+                this.getHelpData();
                 this.open = false;
                 this.loading = false;
               })
@@ -374,7 +298,6 @@ export default {
       this.form = {
         id: undefined,
         title: undefined,
-        sorted: 0,
         content: undefined,
       };
       this.resetForm("form");

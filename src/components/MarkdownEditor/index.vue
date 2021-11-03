@@ -7,204 +7,203 @@
       type="file"
       accept="image/*"
       @change="uploadFile"
-    >
+    />
   </div>
 </template>
 
 <script>
 // deps for editor
-import 'codemirror/lib/codemirror.css' // codemirror
-import 'tui-editor/dist/tui-editor.css' // editor ui
-import 'tui-editor/dist/tui-editor-contents.css' // editor content
+import "codemirror/lib/codemirror.css"; // codemirror
+import "tui-editor/dist/tui-editor.css"; // editor ui
+import "tui-editor/dist/tui-editor-contents.css"; // editor content
 
-import Editor from 'tui-editor'
-import defaultOptions from './default-options'
-import axios from 'axios'
-import { mapGetters } from 'vuex'
+import Editor from "tui-editor";
+import defaultOptions from "./default-options";
+import axios from "axios";
+import { getToken } from "@/utils/auth";
 
 export default {
-  name: 'MarkdownEditor',
+  name: "MarkdownEditor",
   props: {
     value: {
       type: String,
-      default: ''
+      default: "",
     },
     id: {
       type: String,
       required: false,
       default() {
         return (
-          'markdown-editor-' +
+          "markdown-editor-" +
           +new Date() +
-          ((Math.random() * 1000).toFixed(0) + '')
-        )
-      }
+          ((Math.random() * 1000).toFixed(0) + "")
+        );
+      },
     },
     options: {
       type: Object,
       default() {
-        return defaultOptions
-      }
+        return defaultOptions;
+      },
     },
     mode: {
       type: String,
-      default: 'markdown'
+      default: "markdown",
     },
     height: {
       type: String,
       required: false,
-      default: '300px'
+      default: "300px",
     },
     language: {
       type: String,
       required: false,
-      default: 'en_US' // https://github.com/nhnent/tui.editor/tree/master/src/js/langs
-    }
+      default: "en_US", // https://github.com/nhnent/tui.editor/tree/master/src/js/langs
+    },
   },
   data() {
     return {
-      editor: null
-    }
+      editor: null,
+    };
   },
   computed: {
-    ...mapGetters([
-      'token'
-    ]),
     editorOptions() {
-      const options = Object.assign({}, defaultOptions, this.options)
-      options.initialEditType = this.mode
-      options.height = this.height
-      options.language = this.language
-      return options
-    }
+      const options = Object.assign({}, defaultOptions, this.options);
+      options.initialEditType = this.mode;
+      options.height = this.height;
+      options.language = this.language;
+      return options;
+    },
   },
   watch: {
     value(newValue, preValue) {
       if (newValue !== preValue && newValue !== this.editor.getValue()) {
-        this.editor.setValue(newValue)
+        this.editor.setValue(newValue);
       }
     },
     language(val) {
-      this.destroyEditor()
-      this.initEditor()
+      this.destroyEditor();
+      this.initEditor();
     },
     height(newValue) {
-      this.editor.height(newValue)
+      this.editor.height(newValue);
     },
     mode(newValue) {
-      this.editor.changeMode(newValue)
-    }
+      this.editor.changeMode(newValue);
+    },
   },
   mounted() {
-    this.initEditor()
+    this.initEditor();
   },
   destroyed() {
-    this.destroyEditor()
+    this.destroyEditor();
   },
   methods: {
     initEditor() {
       this.editor = new Editor({
         el: document.getElementById(this.id),
-        ...this.editorOptions
-      })
+        ...this.editorOptions,
+      });
       if (this.value) {
-        this.editor.setValue(this.value)
+        this.editor.setValue(this.value);
       }
-      this.editor.on('change', () => {
-        this.$emit('input', this.editor.getValue())
-      })
+      this.editor.on("change", () => {
+        this.$emit("input", this.editor.getValue());
+      });
 
       // 获取编辑器上的功能条
-      const toolbar = this.editor.getUI().getToolbar()
-      const fileDom = this.$refs.files
+      const toolbar = this.editor.getUI().getToolbar();
+      const fileDom = this.$refs.files;
       // 添加事件
-      this.editor.eventManager.addEventType('uploadEvent')
-      this.editor.eventManager.listen('uploadEvent', () => {
-        fileDom.click()
+      this.editor.eventManager.addEventType("uploadEvent");
+      this.editor.eventManager.listen("uploadEvent", () => {
+        fileDom.click();
         // Do some other thing...
-      })
+      });
 
       toolbar.addButton(
         {
-          name: 'customize',
-          className: 'tui-image',
-          event: 'uploadEvent',
-          tooltip: 'insert image',
+          name: "customize",
+          className: "tui-image",
+          event: "uploadEvent",
+          tooltip: "insert image",
           // eslint-disable-next-line no-undef
-          el: '<button class="tui-image tui-toolbar-icons"></button>'
+          el: '<button class="tui-image tui-toolbar-icons"></button>',
         },
         13
-      )
+      );
       // 删除默认监听事件
-      this.editor.eventManager.removeEventHandler('addImageBlobHook')
+      this.editor.eventManager.removeEventHandler("addImageBlobHook");
       // 添加自定义监听事件
-      this.editor.eventManager.listen('addImageBlobHook', (blob, callback) => {
-        this.upload(blob)
-      })
+      this.editor.eventManager.listen("addImageBlobHook", (blob, callback) => {
+        this.upload(blob);
+      });
     },
     destroyEditor() {
-      if (!this.editor) return
-      this.editor.off('change')
-      this.editor.remove()
+      if (!this.editor) return;
+      this.editor.off("change");
+      this.editor.remove();
     },
     setValue(value) {
-      this.editor.setValue(value)
+      this.editor.setValue(value);
     },
     getValue() {
-      return this.editor.getValue()
+      return this.editor.getValue();
     },
     setHtml(value) {
-      this.editor.setHtml(value)
+      this.editor.setHtml(value);
     },
     getHtml() {
-      return this.editor.getHtml()
+      return this.editor.getHtml();
     },
     /*
      * 自定义上传图片处理
      * */
     uploadFile(e) {
-      const target = e.target
-      const file = target.files[0]
-      this.upload(file)
+      const target = e.target;
+      const file = target.files[0];
+      this.upload(file);
 
-      target.value = '' // 这个地方清除一下不然会有问题
+      target.value = ""; // 这个地方清除一下不然会有问题
     },
     upload(file) {
-      const formData = new FormData()
-      formData.append('file', file)
-      formData.append('dir', 'header')
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("dir", "notice");
       axios({
         headers: {
-          'Authorization': localStorage.getItem('token')
+          Authorization: getToken(),
         },
-        method: 'post',
+        method: "post",
         url: process.env.VUE_APP_UPLOAD_API,
-        data: formData
+        data: formData,
       })
         .then((res) => {
           // 上传成功地址拼接
-          const imgUrl = res.data.data
-          this.addImgToMd(imgUrl)
+          const imgUrl = res.data.data;
+          this.addImgToMd(imgUrl);
         })
         .catch((error) => {
-          console.error(error.response)
-        })
+          console.error(error.response);
+        });
     },
     // 添加图片到markdown
     addImgToMd(data) {
-      const editor = this.editor.getCodeMirror()
-      const editorHtml = this.editor.getCurrentModeEditor()
-      const isMarkdownMode = this.editor.isMarkdownMode()
+      const editor = this.editor.getCodeMirror();
+      const editorHtml = this.editor.getCurrentModeEditor();
+      const isMarkdownMode = this.editor.isMarkdownMode();
       if (isMarkdownMode) {
-        editor.replaceSelection(`![img](${data})`)
+        editor.replaceSelection(`![img](${data})`);
       } else {
-        const range = editorHtml.getRange()
-        const img = document.createElement('img')
-        img.src = `${data}`
-        img.alt = 'img'
-        range.insertNode(img)
+        const range = editorHtml.getRange();
+        const img = document.createElement("img");
+        img.src = `${data}`;
+        img.alt = "img";
+        range.insertNode(img);
       }
-    }
-  }
-}
+    },
+  },
+};
 </script>
+<style>
+</style>

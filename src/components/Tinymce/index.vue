@@ -110,7 +110,7 @@ export default {
           return
         }
         this.initTinymce()
-      })
+      })      
     },
     initTinymce() {
       const _this = this
@@ -144,6 +144,7 @@ export default {
           })
         },
         setup(editor) {
+          console.log(1111);
           editor.on('FullscreenStateChanged', (e) => {
             _this.fullscreen = e.state
           })
@@ -192,7 +193,6 @@ export default {
       if (this.fullscreen) {
         tinymce.execCommand('mceFullScreen')
       }
-
       if (tinymce) {
         tinymce.destroy()
       }
