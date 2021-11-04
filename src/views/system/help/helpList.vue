@@ -107,7 +107,7 @@
             <el-form-item label="标题" prop="title">
               <el-input
                 v-model="form.title"
-                placeholder="请输入通告标题"
+                placeholder="请输入帮助标题"
                 clearable
               />
             </el-form-item>
@@ -115,7 +115,7 @@
         </el-row>
         <el-row>
           <el-form-item label="内容">
-            <tinymce ref="content" v-model="form.content" :height="500" />
+            <tinymce v-model="form.content" :height="500" />
           </el-form-item>
         </el-row>
       </el-form>
@@ -126,7 +126,7 @@
     </el-dialog>
     <!-- 添加或修改弹出层结束 -->
 
-    <!-- 通告详情弹出层开始 -->
+    <!-- 帮助详情弹出层开始 -->
     <el-dialog
       :title="title"
       :visible.sync="helpDetailOpen"
@@ -136,7 +136,7 @@
     >
       <tinymce v-model="content" :height="500" />
     </el-dialog>
-    <!-- 通告详情弹出层结束 -->
+    <!-- 帮助详情弹出层结束 -->
   </div>
 </template>
 
@@ -182,9 +182,8 @@ export default {
       rules: {
         title: [{ required: true, message: "标题不能为空", trigger: "blur" }],
       },
-      // 通告内容
+      // 帮助内容
       content: "",
-      
     };
   },
   created() {
@@ -223,7 +222,6 @@ export default {
       this.reset();
       this.title = "添加帮助";
       this.open = true;
-        console.log(this.form.content);
     },
     handleView(row) {
       this.helpDetailOpen = true;
@@ -237,8 +235,6 @@ export default {
       this.loading = true;
       findById(row.id).then((res) => {
         this.form = res.data;
-        // this.$refs.content.setContent(this.form.content)
-        console.log(this.form.content);
         this.loading = false;
       });
     },

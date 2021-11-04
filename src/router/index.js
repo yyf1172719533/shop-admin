@@ -156,6 +156,36 @@ export const asyncRoutes = [
         component: () => import('@/views/system/banner/bannerList'),
         name: 'banner',
         meta: { title: '轮播图管理', icon: 'el-icon-picture' }
+      },
+      {
+        path: 'notice',
+        component: () => import('@/views/system/notice/noticeList'),
+        name: 'notice',
+        meta: { title: '通知管理', icon: 'el-icon-warning' }
+      },
+      {
+        path: 'help',
+        component: () => import('@/views/system/help/helpList'),
+        name: 'help',
+        meta: { title: '帮助中心', icon: 'el-icon-question' }
+      }
+    ]
+  },
+  {
+    path: '/base',
+    component: Layout,
+    redirect: '/base/category',
+    name: 'base',
+    meta: {
+      title: '基础资料',
+      icon: 'el-icon-s-grid'
+    },
+    children: [
+      {
+        path: 'category',
+        component: () => import('@/views/base/category/categoryList'),
+        name: 'category',
+        meta: { title: '商品分类', icon: 'table' }
       }
     ]
   },

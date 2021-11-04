@@ -144,7 +144,6 @@ export default {
           })
         },
         setup(editor) {
-          console.log(1111);
           editor.on('FullscreenStateChanged', (e) => {
             _this.fullscreen = e.state
           })

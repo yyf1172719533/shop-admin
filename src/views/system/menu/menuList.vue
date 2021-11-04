@@ -427,8 +427,13 @@ export default {
         }
       ).then(() => {
         deleteById(row.id).then((res) => {
-          this.msgSuccess(res.msg)
-          this.queryAllMenu()
+          if (res.code === 40000) {
+            this.msgError(res.msg);
+            this.queryAllMenu()
+          } else {
+            this.msgSuccess(res.msg);
+            this.queryAllMenu()
+          } 
         })
       })
     },
