@@ -186,6 +186,12 @@ export const asyncRoutes = [
         component: () => import('@/views/base/category/categoryList'),
         name: 'category',
         meta: { title: '商品分类', icon: 'table' }
+      },
+      {
+        path: 'brand',
+        component: () => import('@/views/base/brand/brandList'),
+        name: 'brand',
+        meta: { title: '商品品牌', icon: 'clipboard' }
       }
     ]
   },

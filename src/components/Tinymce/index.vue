@@ -110,13 +110,13 @@ export default {
           return
         }
         this.initTinymce()
-      })      
+      })
     },
     initTinymce() {
       const _this = this
       window.tinymce.init({
         selector: `#${this.tinymceId}`,
-        language: this.languageTypeList['en'],
+        language: this.languageTypeList['zh'],
         height: this.height,
         body_class: 'panel-body ',
         object_resizing: false,

@@ -32,8 +32,7 @@
           icon="el-icon-plus"
           size="mini"
           @click="handleAdd"
-          >新增</el-button
-        >
+        >新增</el-button>
       </el-col>
       <el-col :span="1.5">
         <el-button
@@ -41,8 +40,7 @@
           icon="el-icon-sort"
           size="mini"
           @click="toggleExpandAll"
-          >展开/折叠</el-button
-        >
+        >展开/折叠</el-button>
       </el-col>
     </el-row>
     <!-- 表格按钮结束 -->
@@ -61,6 +59,7 @@
       <el-table-column label="图片" prop="pictureUrl" align="center">
         <template slot-scope="scope">
           <el-image
+            style="width: 100px; height: 100px"
             :src="scope.row.pictureUrl"
             fit="fill"
             :preview-src-list="[scope.row.pictureUrl]"
@@ -84,22 +83,19 @@
             type="text"
             icon="el-icon-edit"
             @click="handleUpdate(scope.row)"
-            >修改</el-button
-          >
+          >修改</el-button>
           <el-button
             size="mini"
             type="text"
             icon="el-icon-plus"
             @click="handleAdd(scope.row)"
-            >新增</el-button
-          >
+          >新增</el-button>
           <el-button
             size="mini"
             type="text"
             icon="el-icon-delete"
             @click="handleDelete(scope.row)"
-            >删除</el-button
-          >
+          >删除</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -127,7 +123,7 @@
                 :on-success="handleAvatarSuccess"
                 :before-upload="beforeAvatarUpload"
               >
-                <img v-if="imageUrl" :src="imageUrl" class="avatar" />
+                <img v-if="imageUrl" :src="imageUrl" class="avatar">
                 <i v-else class="el-icon-plus avatar-uploader-icon" />
               </el-upload>
             </el-form-item>
@@ -203,15 +199,15 @@ import {
   save,
   update,
   findById,
-  deleteById,
-} from "@/api/base/category";
-import Treeselect from "@riophae/vue-treeselect";
-import "@riophae/vue-treeselect/dist/vue-treeselect.css";
-import { mapGetters } from "vuex";
+  deleteById
+} from '@/api/base/category'
+import Treeselect from '@riophae/vue-treeselect'
+import '@riophae/vue-treeselect/dist/vue-treeselect.css'
+import { mapGetters } from 'vuex'
 
 export default {
   components: {
-    Treeselect,
+    Treeselect
   },
   data() {
     return {
@@ -219,8 +215,8 @@ export default {
       loading: false,
       // 查询参数
       queryParams: {
-          name: undefined,
-          navStatus: undefined
+        name: undefined,
+        navStatus: undefined
       },
       // 数据表格
       categoryList: [],
@@ -229,162 +225,162 @@ export default {
       // 是否重新渲染表格数据
       refreshTable: true,
       // 弹出层标题
-      title: "",
+      title: '',
       // 是否打开弹出层
       open: false,
       // 上传图片地址
       uploadUrl: process.env.VUE_APP_UPLOAD_API,
-      imageUrl: "",
+      imageUrl: '',
       // 表单对象
       form: {},
       // 表单校验
       rules: {
-        name: [{ required: true, message: "请输入分类名称", trigger: "blur" }],
+        name: [{ required: true, message: '请输入分类名称', trigger: 'blur' }]
       },
       // 树形结构数据
-      categoryOptions: [],
-    };
+      categoryOptions: []
+    }
   },
   computed: {
-    ...mapGetters(["token"]),
+    ...mapGetters(['token'])
   },
   created() {
-    this.queryAllCategory();
+    this.queryAllCategory()
   },
   methods: {
     // 查询商品分类列表
     queryAllCategory() {
-      this.loading = true;
+      this.loading = true
       queryAll(this.queryParams).then((res) => {
-        this.categoryList = this.handleTree(res.data, "id");
-        this.loading = false;
-      });
+        this.categoryList = this.handleTree(res.data, 'id')
+        this.loading = false
+      })
     },
     handleQuery() {
-      this.queryAllCategory();
+      this.queryAllCategory()
     },
     resetQuery() {
-      this.resetForm("queryForm");
-      this.queryAllCategory();
+      this.resetForm('queryForm')
+      this.queryAllCategory()
     },
     toggleExpandAll() {
-      this.refreshTable = false;
-      this.isExpandAll = !this.isExpandAll;
+      this.refreshTable = false
+      this.isExpandAll = !this.isExpandAll
       this.$nextTick(() => {
-        this.refreshTable = true;
-      });
+        this.refreshTable = true
+      })
     },
     normalizer(node) {
       if (node.children && !node.children.length) {
-        delete node.children;
+        delete node.children
       }
       return {
         id: node.id,
         label: node.name,
-        children: node.children,
-      };
+        children: node.children
+      }
     },
     getTreeSelectData() {
       queryAll().then((res) => {
-        let categoryList = res.data;
-        categoryList = categoryList.filter((e) => e.level !== 3);
-        this.categoryOptions = [];
-        const category = { id: 0, name: "主类目", children: [] };
-        category.children = this.handleTree(categoryList, "id");
-        this.categoryOptions.push(category);
-      });
+        let categoryList = res.data
+        categoryList = categoryList.filter((e) => e.level !== 3)
+        this.categoryOptions = []
+        const category = { id: 0, name: '主类目', children: [] }
+        category.children = this.handleTree(categoryList, 'id')
+        this.categoryOptions.push(category)
+      })
     },
     handleAdd(row) {
-      this.reset();
-      this.getTreeSelectData();
+      this.reset()
+      this.getTreeSelectData()
       if (row != null && row.id) {
-        this.form.parentId = row.id;
+        this.form.parentId = row.id
       } else {
-        this.form.parentId = 0;
+        this.form.parentId = 0
       }
-      this.title = "添加商品分类";
-      this.open = true;
+      this.title = '添加商品分类'
+      this.open = true
     },
     handleUpdate(row) {
-      this.reset();
-      this.getTreeSelectData();
-      this.title = "修改商品分类";
-      this.open = true;
+      this.reset()
+      this.getTreeSelectData()
+      this.title = '修改商品分类'
+      this.open = true
       findById(row.id).then((res) => {
-        this.form = res.data;
-        this.imageUrl = this.form.pictureUrl;
-      });
+        this.form = res.data
+        this.imageUrl = this.form.pictureUrl
+      })
     },
     handleDelete(row) {
       this.$confirm(
         '是否确认删除名称为"' + row.name + '"的商品分类？',
-        "提示",
+        '提示',
         {
-          confirmButtonText: "确定",
-          cancelButtonText: "取消",
-          type: "warning",
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
         }
       ).then(() => {
         deleteById(row.id).then((res) => {
           if (res.code === 40000) {
-            this.msgError(res.msg);
-            this.queryAllCategory();
+            this.msgError(res.msg)
+            this.queryAllCategory()
           } else {
-            this.msgSuccess(res.msg);
-            this.queryAllCategory();
+            this.msgSuccess(res.msg)
+            this.queryAllCategory()
           }
-        });
-      });
+        })
+      })
     },
     // 头像上传成功后的回调
     handleAvatarSuccess(res, file) {
-      this.msgSuccess(res.msg);
-      this.imageUrl = res.data;
-      this.form.pictureUrl = res.data;
+      this.msgSuccess(res.msg)
+      this.imageUrl = res.data
+      this.form.pictureUrl = res.data
     },
     // 上传头像前的回调
     beforeAvatarUpload(file) {
-      const fileSize = file.size / 1024 / 1024;
+      const fileSize = file.size / 1024 / 1024
       if (fileSize > 10) {
-        this.msgError("上传头像图片大小不能超过 10MB!");
+        this.msgError('上传头像图片大小不能超过 10MB!')
       }
     },
     submitForm() {
-      this.$refs["form"].validate((valid) => {
+      this.$refs['form'].validate((valid) => {
         if (valid) {
           if (this.form.id === undefined) {
             // 添加
             save(this.form)
               .then((res) => {
-                this.msgSuccess(res.msg);
-                this.loading = false;
-                this.open = false;
-                this.queryAllCategory();
+                this.msgSuccess(res.msg)
+                this.loading = false
+                this.open = false
+                this.queryAllCategory()
               })
               .catch(() => {
-                this.msgError("添加失败");
-                this.loading = false;
-              });
+                this.msgError('添加失败')
+                this.loading = false
+              })
           } else {
             // 修改
             update(this.form)
               .then((res) => {
-                this.msgSuccess(res.msg);
-                this.loading = false;
-                this.open = false;
-                this.queryAllCategory();
+                this.msgSuccess(res.msg)
+                this.loading = false
+                this.open = false
+                this.queryAllCategory()
               })
               .catch(() => {
-                this.msgError("修改失败");
-                this.loading = false;
-              });
+                this.msgError('修改失败')
+                this.loading = false
+              })
           }
         }
-      });
+      })
     },
     cancel() {
-      this.open = false;
-      this.title = "";
+      this.open = false
+      this.title = ''
     },
     reset() {
       this.form = {
@@ -393,12 +389,12 @@ export default {
         name: undefined,
         sort: 0,
         level: 1,
-        navStatus: 1,
-      };
-      this.imageUrl = "";
-    },
-  },
-};
+        navStatus: 1
+      }
+      this.imageUrl = ''
+    }
+  }
+}
 </script>
 
 <style>
