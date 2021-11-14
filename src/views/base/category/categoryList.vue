@@ -85,6 +85,7 @@
             @click="handleUpdate(scope.row)"
           >修改</el-button>
           <el-button
+            v-show="scope.row.level !== 3"
             size="mini"
             type="text"
             icon="el-icon-plus"
