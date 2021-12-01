@@ -42,3 +42,19 @@ export function deleteById(id) {
     method: 'delete'
   })
 }
+
+// 根据商品分类ID查询商品品牌
+export function queryBrandByCategoryId(categoryId) {
+  return request({
+    url: 'shop/brand/queryBrandByCategoryId/' + categoryId,
+    method: 'get'
+  })
+}
+
+// 根据关键字查询商品品牌
+export function queryBrandByKeyWord(query) {
+  return request({
+    url: 'shop/brand/queryBrandByKeyWord/' + query,
+    method: 'get'
+  })
+}

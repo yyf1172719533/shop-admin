@@ -260,6 +260,7 @@
                     :on-remove="handleRemove"
                     :data="{ dir: 'product' }"
                     :headers="{ Authorization: token }"
+                    :file-list="albumPicList"
                     :on-success="handleBannerSuccess"
                     :before-upload="beforeAvatarUpload"
                   >
@@ -280,7 +281,7 @@
                   <div class="product-text">
                     商品详情建议采用上传多图的方式。文字内容过多可能会影响加载效果
                   </div>
-                  <tinymce v-model="form.productDetail" :height="500" />
+                  <tinymce ref="content" v-model="form.productDetail" :height="500" />
                 </el-form-item>
               </el-col>
             </el-row>
@@ -320,7 +321,7 @@ import { mapGetters } from 'vuex'
 import Tinymce from '@/components/Tinymce'
 import { queryAll } from '@/api/base/category'
 import { queryBrandByCategoryId } from '@/api/base/brand'
-import { save } from '@/api/product/product'
+import { update, findById } from '@/api/product/product'
 
 export default {
   components: { Tinymce },
@@ -379,6 +380,21 @@ export default {
   created() {
     queryAll().then((res) => {
       this.categoryOptions = this.handleTree(res.data, 'id')
+    })
+    const productId = this.$route.params.id
+    findById(productId).then(res => {
+      this.form = res.data
+      if (res.data.productPicture) {
+        this.imageUrl = res.data.productPicture
+      }
+      const bannerList = res.data.albumPicList
+      if (bannerList && bannerList[0]) {
+        bannerList.forEach(e => this.albumPicList.push({ url: e }))
+      }
+      this.$nextTick(() => {
+        this.$refs.content.setContent(res.data.productDetail)
+      })
+      this.getBrandList()
     })
   },
   methods: {
@@ -442,7 +458,7 @@ export default {
           const albumPicList = []
           this.albumPicList.forEach((e) => albumPicList.push(e.url))
           this.form.albumPicList = albumPicList
-          save(this.form)
+          update(this.form)
             .then((res) => {
               this.msgSuccess(res.msg)
               this.$router.push({ path: '/product/list' })
