@@ -43,9 +43,13 @@ service.interceptors.response.use(
         type: 'warning'
       }
       ).then(() => {
-        store.dispatch('user/logout').then(() => {
-          this.$router.push(`/login?redirect=${this.$route.fullPath}`)
-        })
+        // console.log(1);
+        // store.dispatch('logout').then(() => {
+        //   console.log("进来了");
+        //   // this.$router.push(`/login?redirect=${this.$route.fullPath}`)
+
+        // })
+        location.href = '/index'
       }).catch(() => { })
       return Promise.reject('无效的会话，或者会话已过期，请重新登录。')
     } else if (res.code === 40004) {
@@ -55,7 +59,7 @@ service.interceptors.response.use(
         duration: 5 * 1000
       })
       return Promise.reject(new Error(res.msg || 'Error'))
-    } else {
+    } else if (res.code === 20000) {
       return res
     }
     // if (res.code !== 20000) {

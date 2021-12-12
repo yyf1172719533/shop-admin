@@ -42,3 +42,11 @@ export function findById(id) {
     method: 'get'
   })
 }
+
+// 根据套装ID查询关联的商品信息
+export function queryProductByPackId(packId) {
+  return request({
+    url: 'shop/pack/queryProductByPackId/' + packId,
+    method: 'get'
+  })
+}

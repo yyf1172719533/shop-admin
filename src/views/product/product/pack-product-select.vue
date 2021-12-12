@@ -122,7 +122,7 @@
                 inactive-color="#ff4949"
                 :active-value="1"
                 :inactive-value="0"
-                @change="changeStatus1($event, scope.row)"
+                disabled
               />
             </div>
             <div class="switch-item">
@@ -133,7 +133,7 @@
                 inactive-color="#ff4949"
                 :active-value="1"
                 :inactive-value="0"
-                @change="changeStatus2($event, scope.row)"
+                disabled
               />
             </div>
             <div class="switch-item">
@@ -144,7 +144,7 @@
                 inactive-color="#ff4949"
                 :active-value="1"
                 :inactive-value="0"
-                @change="changeStatus3($event, scope.row)"
+                disabled
               />
             </div>
           </div>

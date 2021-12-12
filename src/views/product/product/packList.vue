@@ -61,8 +61,14 @@
         align="center"
         width="120"
       />
-      <el-table-column label="操作" align="center" width="150">
+      <el-table-column label="操作" align="center" width="200">
         <template slot-scope="scope">
+          <el-button
+            size="mini"
+            type="text"
+            icon="el-icon-s-order"
+            @click="handleViewProduct(scope.row)"
+          >商品清单</el-button>
           <el-button
             size="mini"
             type="text"
@@ -169,6 +175,35 @@
         @selectSubmit="selectSubmit"
       />
     </el-dialog>
+
+    <el-dialog
+      width="60%"
+      :visible.sync="openViewDialog"
+      title="商品清单"
+      center
+    >
+      <el-table
+        :data="productList"
+        border
+        style="width: 100%"
+        :cell-style="cellStyle"
+      >
+        <el-table-column label="编号" prop="id" align="center" />
+        <el-table-column label="商品名称" prop="productName" align="center" />
+        <el-table-column label="商品价格(元)" prop="price" align="center" />
+        <el-table-column label="商品库存" prop="stockNum" align="center" />
+        <el-table-column label="商品品牌" prop="brandName" align="center">
+          <template slot-scope="scope">
+            <el-tag type="success">{{ scope.row.brandName }}</el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column label="规格" prop="specification" align="center" />
+        <el-table-column label="创建时间" prop="createTime" align="center" />
+      </el-table>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="() => openViewDialog = false">关 闭</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
@@ -178,7 +213,8 @@ import {
   update,
   deleteById,
   listForPage,
-  findById
+  findById,
+  queryProductByPackId
 } from '@/api/product/pack'
 import selectProduct from './pack-product-select.vue'
 
@@ -209,12 +245,14 @@ export default {
       form: {},
       // 表单校验
       rules: {
-        name: [
-          { required: true, message: '请输入套装名称', trigger: 'blur' }
-        ]
+        name: [{ required: true, message: '请输入套装名称', trigger: 'blur' }]
       },
       // 是否打开选择商品弹出层
-      openSelectProductDialog: false
+      openSelectProductDialog: false,
+      // 商品清单
+      productList: [],
+      // 是否打开商品清单弹出层
+      openViewDialog: false
     }
   },
   created() {
@@ -282,6 +320,13 @@ export default {
           })
       })
     },
+    handleViewProduct(row) {
+      this.productList = []
+      this.openViewDialog = true
+      queryProductByPackId(row.id).then((res) => {
+        this.productList = res.data
+      })
+    },
     cellStyle(row) {
       if (row.column.label === '商品库存' && row.row.stockNum <= 100) {
         return 'color: red'
@@ -304,21 +349,25 @@ export default {
       this.$refs['form'].validate((valid) => {
         if (valid) {
           if (this.form.id === undefined) {
-            save(this.form).then(res => {
-              this.msgSuccess(res.msg)
-              this.open = false
-              this.getProductPackList()
-            }).catch(() => {
-              this.msgSuccess('添加失败')
-            })
+            save(this.form)
+              .then((res) => {
+                this.msgSuccess(res.msg)
+                this.open = false
+                this.getProductPackList()
+              })
+              .catch(() => {
+                this.msgSuccess('添加失败')
+              })
           } else {
-            update(this.form).then(res => {
-              this.msgSuccess(res.msg)
-              this.open = false
-              this.getProductPackList()
-            }).catch(() => {
-              this.msgSuccess('修改失败')
-            })
+            update(this.form)
+              .then((res) => {
+                this.msgSuccess(res.msg)
+                this.open = false
+                this.getProductPackList()
+              })
+              .catch(() => {
+                this.msgSuccess('修改失败')
+              })
           }
         }
       })
