@@ -298,6 +298,104 @@
             </div>
           </div>
           <div v-show="activeStep === 3" class="product-form">
+            <el-row :gutter="20">
+              <el-col :span="24">
+                <el-form-item>
+                  <div class="product-text">
+                    请选择与该商品打包的商品，也可以直接将该商品加入到指定套装。如果都进行选择，则会将该商品和选中商品一并加入套装
+                  </div>
+                </el-form-item>
+              </el-col>
+            </el-row>
+            <el-row :gutter="20">
+              <el-col :span="24">
+                <el-form-item label="关联套装">
+                  <el-button
+                    type="primary"
+                    @click="selectPack"
+                  >选择套装</el-button>
+                </el-form-item>
+                <el-form-item>
+                  <el-table :data="selectPackList" border style="width: 100%">
+                    <el-table-column
+                      label="套装编号"
+                      prop="id"
+                      align="center"
+                    />
+                    <el-table-column label="名称" prop="name" align="center" />
+                    <el-table-column
+                      label="商品数"
+                      prop="productCount"
+                      align="center"
+                      width="100"
+                    />
+                    <el-table-column
+                      label="创建时间"
+                      prop="createTime"
+                      align="center"
+                      width="160"
+                    />
+                    <el-table-column
+                      label="创建人"
+                      prop="createBy"
+                      align="center"
+                      width="100"
+                    />
+                  </el-table>
+                </el-form-item>
+              </el-col>
+            </el-row>
+            <el-row :gutter="20">
+              <el-col :span="24">
+                <el-form-item label="商品打包">
+                  <el-button type="primary" @click="selectProduct">选择商品</el-button>
+                </el-form-item>
+                <el-form-item>
+                  <el-table
+                    :data="form.productList"
+                    border
+                    style="width: 100%"
+                    :cell-style="cellStyle"
+                  >
+                    <el-table-column
+                      label="商品名称"
+                      prop="productName"
+                      align="center"
+                    />
+                    <el-table-column
+                      label="商品价格(元)"
+                      prop="price"
+                      align="center"
+                    />
+                    <el-table-column
+                      label="商品库存"
+                      prop="stockNum"
+                      align="center"
+                    />
+                    <el-table-column
+                      label="商品品牌"
+                      prop="brandName"
+                      align="center"
+                    >
+                      <template slot-scope="scope">
+                        <el-tag type="success">{{
+                          scope.row.brandName
+                        }}</el-tag>
+                      </template>
+                    </el-table-column>
+                    <el-table-column label="操作" align="center">
+                      <template slot-scope="scope">
+                        <el-button
+                          type="text"
+                          icon="el-icon-delete"
+                          @click="deleteProduct(scope.row.id)"
+                        >删除</el-button>
+                      </template>
+                    </el-table-column>
+                  </el-table>
+                </el-form-item>
+              </el-col>
+            </el-row>
             <div align="center">
               <el-button
                 style="margin-top: 12px"
@@ -313,6 +411,26 @@
         </el-form>
       </el-card>
     </div>
+
+    <el-dialog
+      width="70%"
+      :visible.sync="openSelectPackDialog"
+      append-to-body
+      title="选择套装"
+      center
+    >
+      <pack-select :default-select="form.shopPack" @selected="setShopPack" />
+    </el-dialog>
+
+    <el-dialog
+      width="70%"
+      :visible.sync="openSelectProductDialog"
+      append-to-body
+      title="选择商品"
+      center
+    >
+      <product-select :default-select="form.productList" @selected="setProductList" />
+    </el-dialog>
   </div>
 </template>
 
@@ -322,9 +440,11 @@ import Tinymce from '@/components/Tinymce'
 import { queryAll } from '@/api/base/category'
 import { queryBrandByCategoryId } from '@/api/base/brand'
 import { update, findById } from '@/api/product/product'
+import packSelect from '../pack/pack-select.vue'
+import productSelect from '../product/product-select.vue'
 
 export default {
-  components: { Tinymce },
+  components: { Tinymce, packSelect, productSelect },
   data() {
     return {
       // 步骤条数
@@ -371,7 +491,13 @@ export default {
       // 轮播图图片地址
       dialogImageUrl: '',
       // 轮播图数据
-      albumPicList: []
+      albumPicList: [],
+      // 是否打开选择套装弹出层
+      openSelectPackDialog: false,
+      // 是否选择商品弹出层
+      openSelectProductDialog: false,
+      // 选择的商品套装
+      selectPackList: []
     }
   },
   computed: {
@@ -386,6 +512,9 @@ export default {
       this.form = res.data
       if (res.data.productPicture) {
         this.imageUrl = res.data.productPicture
+      }
+      if (res.data.shopPack) {
+        this.selectPackList = [res.data.shopPack]
       }
       const bannerList = res.data.albumPicList
       if (bannerList && bannerList[0]) {
@@ -473,6 +602,33 @@ export default {
           })
         }
       })
+    },
+    cellStyle(row) {
+      if (row.column.label === '商品库存' && row.row.stockNum <= 100) {
+        return 'color: red'
+      }
+    },
+    deleteProduct(id) {
+      this.form.productList.splice(this.form.productList.findIndex(item => item.id === id), 1)
+    },
+    selectPack() {
+      this.openSelectPackDialog = true
+    },
+    selectProduct() {
+      this.openSelectProductDialog = true
+    },
+    setShopPack(shopPack) {
+      this.form.shopPack = shopPack
+      if (shopPack) {
+        this.selectPackList = [shopPack]
+      } else {
+        this.selectPackList = []
+      }
+      this.openSelectPackDialog = false
+    },
+    setProductList(productList) {
+      this.form.productList = productList
+      this.openSelectProductDialog = false
     }
   }
 }
