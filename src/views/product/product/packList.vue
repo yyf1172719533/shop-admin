@@ -107,6 +107,7 @@
       append-to-body
       width="800px"
       center
+      :close-on-click-modal="false"
     >
       <el-form
         ref="form"
